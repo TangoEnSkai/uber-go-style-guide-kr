@@ -1,6 +1,7 @@
 # uber-go-style-guide-kr
 
 Translated in Korean
+Currently WIP, but translation will done by 20th of Oct, 2019
 
 ---
 
