@@ -54,17 +54,14 @@ row before the </tbody></table> line.
 
 -->
 
-# Uber의 Go언어 스타일 가이드
-
-## 목차
+# Uber의 Go언어 스타일 가이드 (Uber's Go Style Guide)
 
 - [uber-go-style-guide-kr](#uber-go-style-guide-kr)
-- [Uber의 Go언어 스타일 가이드](#uber%ec%9d%98-go%ec%96%b8%ec%96%b4-%ec%8a%a4%ed%83%80%ec%9d%bc-%ea%b0%80%ec%9d%b4%eb%93%9c)
-  - [목차](#%eb%aa%a9%ec%b0%a8)
-  - [Introduction](#introduction)
-  - [Guidelines](#guidelines)
-    - [Pointers to Interfaces](#pointers-to-interfaces)
-    - [Receivers and Interfaces](#receivers-and-interfaces)
+- [Uber의 Go언어 스타일 가이드 (Uber's Go Style Guide)](#uber%ec%9d%98-go%ec%96%b8%ec%96%b4-%ec%8a%a4%ed%83%80%ec%9d%bc-%ea%b0%80%ec%9d%b4%eb%93%9c-ubers-go-style-guide)
+  - [소개 (Introduction)](#%ec%86%8c%ea%b0%9c-introduction)
+  - [가이드라인 (Guidelines)](#%ea%b0%80%ec%9d%b4%eb%93%9c%eb%9d%bc%ec%9d%b8-guidelines)
+    - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4%ec%97%90-%eb%8c%80%ed%95%9c-%ed%8f%ac%ec%9d%b8%ed%84%b0-pointers-to-interfaces)
+    - [수신자(Receivers)와 인터페이스(Interfaces)](#%ec%88%98%ec%8b%a0%ec%9e%90receivers%ec%99%80-%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4interfaces)
     - [Zero-value Mutexes are Valid](#zero-value-mutexes-are-valid)
     - [Copy Slices and Maps at Boundaries](#copy-slices-and-maps-at-boundaries)
       - [Receiving Slices and Maps](#receiving-slices-and-maps)
@@ -105,15 +102,13 @@ row before the </tbody></table> line.
     - [Test Tables](#test-tables)
     - [Functional Options](#functional-options)
 
-## Introduction
+## 소개 (Introduction)
 
 스타일은 코드를 통제하는(govern) 관습이다. 이러한 관습(convention)은 소스파일 포맷팅 (e.g. gofmt)보다 더 많은 영역을 다루기(cover) 때문에, "스타일" 이라는 단어 자체가 약간 부적절 할 수 있다.
 
-본 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것 (Dos and Don'ts)에 대하여 자세하게 설명하여 이러한 복잡성을 관리하는 것이다. 이런 규칙들은 엔지니어들이 Go 언어의 특성을(feature) 생산적으로 계속 사용할 수 있도록 코드 베이스를 관리가능하게 유지하기위해 존재한다.
+본 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것 (Dos and Don'ts)에 대하여 자세하게 설명하여 이러한 복잡성을 관리하는 것이다. 이런 규칙들은 엔지니어들이 Go 언어의 특성을(feature) 생산적으로개계속 사용할 수 있도록 코드 베이스를 관리가능하게 유지하기위해 존재한다.
 
-이 가이드는 원래 [Prashant Varanasi]  [Simon Newton]as
-a way to bring some colleagues up to speed with using Go. Over the years it has
-been amended based on feedback from others.
+이 가이드는 원래 [Prashant Varanasi]와 [Simon Newton]이 동료들에게 Go를 사용하면서 개발속도 향상을 도모하기 위해 소개되었다. 또한, 수 년에 거쳐서 다른 사람들로부터의 피드백을 통해서 개정되 오고 있다.
 
   [Prashant Varanasi]: https://github.com/prashantv
   [Simon Newton]: https://github.com/nomis52 
@@ -131,28 +126,24 @@ been amended based on feedback from others.
 아래의 링크를 통해서 Go 툴을 지원하는 에디터에 대한 정보를 얻을 수 있다:
 <https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins>
 
-## Guidelines
+## 가이드라인 (Guidelines)
 
-### Pointers to Interfaces
+### 인터페이스에 대한 포인터 (Pointers to Interfaces)
 
-You almost never need a pointer to an interface. You should be passing
-interfaces as values—the underlying data can still be a pointer.
+일반적으로 인터페이스에 대한 포인터는 거의 필요하지 않을 것이다. 여러분들은 인터페이스를 값(value)으로서 전달(passing)해야 할 것이며, 인터페이스에 대한 기본 데이터(underlying data)는 여전히 포인터가 될 수 있다.
 
-An interface is two fields:
+한 인터페이스는 두 가지 필드이다:
 
-1. A pointer to some type-specific information. You can think of this as
-  "type."
-2. Data pointer. If the data stored is a pointer, it’s stored directly. If
-  the data stored is a value, then a pointer to the value is stored.
+1. 타입-특정 정보(type-specific information)에 대한 포인터. 여러분들을 이것을 "타입"으로 간주할 수 있다.
+2. 데이터 포인터. 저장된 데이터가 포인터일 경우, 이것은 직접적으로 저장될 수 있다. 만약, 저장된 데이터가 값(value)인 경우, 값에 대한 포인터가 저장된다.
 
-If you want interface methods to modify the underlying data, you must use a
-pointer.
+만약 여러분들이 기본 데이터(underlying data) 수정하기 위한 인터페이스 메서드 (interface methods)를 원한다면, 여러분들은 반드시 포인터를 사용해야 한다.
 
-### Receivers and Interfaces
+### 수신자(Receivers)와 인터페이스(Interfaces)
 
-Methods with value receivers can be called on pointers as well as values.
+값 수신자 (value receivers)와 메서드(Methods)는 포인터 혹은 값에 의해서 호출 될 수 있다.
 
-For example,
+예를 들면,
 
 ```go
 type S struct {
@@ -169,21 +160,20 @@ func (s *S) Write(str string) {
 
 sVals := map[int]S{1: {"A"}}
 
-// You can only call Read using a value
+// 오직 값만 사용하여 Read를 호출 할 수 있다.
 sVals[1].Read()
 
-// This will not compile:
+// 아래 코드는 컴파일 되지 않을 것:
 //  sVals[1].Write("test")
 
 sPtrs := map[int]*S{1: {"A"}}
 
-// You can call both Read and Write using a pointer
+// 포인터를 사용하여 Read와 Write 모두 호출 할 수 있다.
 sPtrs[1].Read()
 sPtrs[1].Write("test")
 ```
 
-Similarly, an interface can be satisfied by a pointer, even if the method has a
-value receiver.
+마찬가지로, 메서드가 값 수신자(value receiver)를 가지고 있다고 하더라도 포인터가 인터페이스를 충족시킬 수 있다. 
 
 ```go
 type F interface {
@@ -208,11 +198,11 @@ i = s1Val
 i = s1Ptr
 i = s2Ptr
 
-// The following doesn't compile, since s2Val is a value, and there is no value receiver for f.
+// s2Val이 값이고 f에 대한 수신자가 없기 때문에, 아래의 코드는 컴파일 되지 않는다.
 //   i = s2Val
 ```
 
-Effective Go has a good write up on [Pointers vs. Values].
+Effective Go에 [Pointers vs. Values]에 대한 좋은 글이 있으니 참고하기 바란다.
 
   [Pointers vs. Values]: https://golang.org/doc/effective_go.html#pointers_vs_values
 
