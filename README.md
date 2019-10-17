@@ -68,7 +68,7 @@ row before the </tbody></table> line.
     - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-%eb%b3%b5%ec%82%accopy-slices%ec%99%80-%eb%b0%94%ec%9a%b4%eb%8d%94%eb%a6%ac-%ec%97%90%ec%84%9c%ec%9d%98-%eb%a7%b5maps-at-boundaries)
       - [Slices와 Maps의 수신(receiving)](#slices%ec%99%80-maps%ec%9d%98-%ec%88%98%ec%8b%a0receiving)
       - [슬라이스(Slices)와 맵(Maps)의 리턴](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4slices%ec%99%80-%eb%a7%b5maps%ec%9d%98-%eb%a6%ac%ed%84%b4)
-    - [Defer to Clean Up](#defer-to-clean-up)
+    - [Defer에서 Clean Up까지](#defer%ec%97%90%ec%84%9c-clean-up%ea%b9%8c%ec%a7%80)
     - [Channel Size is One or None](#channel-size-is-one-or-none)
     - [Start Enums at One](#start-enums-at-one)
     - [Error Types](#error-types)
@@ -396,9 +396,9 @@ snapshot := stats.Snapshot()
 </td></tr>
 </tbody></table>
 
-### Defer to Clean Up
+### Defer에서 Clean Up까지
 
-Use defer to clean up resources such as files and locks.
+`defer`를 사용해여 파일(files)과 잠금(locks)과 같은 리소스를 정리하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -418,7 +418,7 @@ p.Unlock()
 
 return newCount
 
-// easy to miss unlocks due to multiple returns
+// 여러개의 return으로 인해서 Unlock호출을 놓치기 쉬움
 ```
 
 </td><td>
@@ -434,17 +434,13 @@ if p.count < 10 {
 p.count++
 return p.count
 
-// more readable
+// 더 나은 가독성 
 ```
 
 </td></tr>
 </tbody></table>
 
-Defer has an extremely small overhead and should be avoided only if you can
-prove that your function execution time is in the order of nanoseconds. The
-readability win of using defers is worth the miniscule cost of using them. This
-is especially true for larger methods that have more than simple memory
-accesses, where the other computations are more significant than the `defer`.
+`defer`는 오버헤드가 상당히 작으며 함수 실행 시간이 나노초 단위임을 증명할 수 있을 경우가 아닌 이상 피하지 않고 사용해야 한다. `defer`의 사용으로 인한 가독성의 이점으로 인하여 지연을 사용하는 비용은 적다. 간단한 메모리 접근(simple memory accesses)이상을 가지는 거대한 메서드가 있는 경우, 다른 계산이 `defer`보다 더 중요하다.
 
 ### Channel Size is One or None
 
