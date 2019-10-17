@@ -69,7 +69,7 @@ row before the </tbody></table> line.
       - [Slices와 Maps의 수신(receiving)](#slices%ec%99%80-maps%ec%9d%98-%ec%88%98%ec%8b%a0receiving)
       - [슬라이스(Slices)와 맵(Maps)의 리턴](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4slices%ec%99%80-%eb%a7%b5maps%ec%9d%98-%eb%a6%ac%ed%84%b4)
     - [Defer에서 Clean Up까지](#defer%ec%97%90%ec%84%9c-clean-up%ea%b9%8c%ec%a7%80)
-    - [Channel Size is One or None](#channel-size-is-one-or-none)
+    - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#%ec%b1%84%eb%84%90%ec%9d%98-%ed%81%ac%ea%b8%b0channel-size%eb%8a%94-%ed%95%98%eb%82%98one-%ed%98%b9%ec%9d%80-%ec%a0%9c%eb%a1%9cnone)
     - [Start Enums at One](#start-enums-at-one)
     - [Error Types](#error-types)
     - [Error Wrapping](#error-wrapping)
@@ -440,15 +440,11 @@ return p.count
 </td></tr>
 </tbody></table>
 
-`defer`는 오버헤드가 상당히 작으며 함수 실행 시간이 나노초 단위임을 증명할 수 있을 경우가 아닌 이상 피하지 않고 사용해야 한다. `defer`의 사용으로 인한 가독성의 이점으로 인하여 지연을 사용하는 비용은 적다. 간단한 메모리 접근(simple memory accesses)이상을 가지는 거대한 메서드가 있는 경우, 다른 계산이 `defer`보다 더 중요하다.
+`defer`는 오버헤드가 상당히 작으며 함수 실행 시간이 나노초 단위임을 증명할 수 있을 경우가 아닌 이상 피하지 않고 사용해야 한다. `defer`의 사용으로 인한 가독성의 이점으로 인하여 지연을 사용하는 비용은 적다. 간단한 메모리 접근(simple memory accesses)이상을 가지는 거대한 메서로가 있는 경우, 다른 계산이 `defer`보다 더 중요하다.
 
-### Channel Size is One or None
+### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)
 
-Channels should usually have a size of one or be unbuffered. By default,
-channels are unbuffered and have a size of zero. Any other size
-must be subject to a high level of scrutiny. Consider how the size is
-determined, what prevents the channel from filling up under load and blocking
-writers, and what happens when this occurs.
+채널의 크기는 일반적으로 1이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사(scrutiny)를 받아야 한다. 어떻게 크기를 결정(determined)할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -456,17 +452,17 @@ writers, and what happens when this occurs.
 <tr><td>
 
 ```go
-// Ought to be enough for anybody!
+// 누구에게나 충분하다!
 c := make(chan int, 64)
 ```
 
 </td><td>
 
 ```go
-// Size of one
-c := make(chan int, 1) // or
-// Unbuffered channel, size of zero
-c := make(chan int)
+// 사이즈 1
+c := make(chan int, 1) // 혹은
+// 버퍼링 되지 않는 채널, 사이즈 0
+c :=은make(chan int)
 ```
 
 </td></tr>
