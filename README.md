@@ -75,7 +75,7 @@ row before the </tbody></table> line.
     - [오류 래핑(Error Wrapping)](#%ec%98%a4%eb%a5%98-%eb%9e%98%ed%95%91error-wrapping)
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#%ed%83%80%ec%9e%85%ec%9d%98-%ec%96%b4%ec%84%a4%ec%85%98-%ec%8b%a4%ed%8c%a8-%eb%8b%a4%eb%a3%a8%ea%b8%b0-handle-type-assertion-failures)
     - [패닉을 피할 것 (Don't Panic)](#%ed%8c%a8%eb%8b%89%ec%9d%84-%ed%94%bc%ed%95%a0-%ea%b2%83-dont-panic)
-    - [Use go.uber.org/atomic](#use-gouberorgatomic)
+    - [go.uber.org/atomic의 사용](#gouberorgatomic%ec%9d%98-%ec%82%ac%ec%9a%a9)
   - [Performance](#performance)
     - [Prefer strconv over fmt](#prefer-strconv-over-fmt)
     - [Avoid string-to-byte conversion](#avoid-string-to-byte-conversion)
@@ -861,14 +861,11 @@ if err != nil {
 
 <!-- TODO: Explain how to use _test packages. -->
 
-### Use go.uber.org/atomic
+### go.uber.org/atomic의 사용
 
-Atomic operations with the [sync/atomic] package operate on the raw types
-(`int32`, `int64`, etc.) so it is easy to forget to use the atomic operation to
-read or modify the variables.
+[sync/atomic] 패키지를 사용한 아토믹 연산(atomic operation)은 원시 타입 (raw type: e.g. `int32`, `int64`, etc.)에서 작동하므로, 아토믹 연산을 사용하여 변수를 읽거나 수정하는 것을 쉽게 잊어버릴 수 있다.
 
-[go.uber.org/atomic] adds type safety to these operations by hiding the
-underlying type. Additionally, it includes a convenient `atomic.Bool` type.
+[go.uber.org/atomic]는 기본 타입(underlying type)을 숨겨서 이런 유형의 연산에 타입 안전성을 부여한다(add type safety). 또한, 이는 간편한 `atomic.Bool` 타입을 포함하고 있다.
 
   [go.uber.org/atomic]: https://godoc.org/go.uber.org/atomic
   [sync/atomic]: https://golang.org/pkg/sync/atomic/
