@@ -71,7 +71,7 @@ row before the </tbody></table> line.
     - [Defer에서 Clean Up까지](#defer%ec%97%90%ec%84%9c-clean-up%ea%b9%8c%ec%a7%80)
     - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#%ec%b1%84%eb%84%90%ec%9d%98-%ed%81%ac%ea%b8%b0channel-size%eb%8a%94-%ed%95%98%eb%82%98one-%ed%98%b9%ec%9d%80-%ec%a0%9c%eb%a1%9cnone)
     - [Enums은 1에서부터 시작하라](#enums%ec%9d%80-1%ec%97%90%ec%84%9c%eb%b6%80%ed%84%b0-%ec%8b%9c%ec%9e%91%ed%95%98%eb%9d%bc)
-    - [Error Types](#error-types)
+    - [에러 형(Error Types)](#%ec%97%90%eb%9f%ac-%ed%98%95error-types)
     - [Error Wrapping](#error-wrapping)
     - [Handle Type Assertion Failures](#handle-type-assertion-failures)
     - [Don't Panic](#dont-panic)
@@ -524,31 +524,27 @@ const (
 
 <!-- TODO: section on String methods for enums -->
 
-### Error Types
+### 에러 형(Error Types)
 
-There are various options for declaring errors:
+에러를 선언하는데 있어서 다양한 옵션들이 존재한다:
 
-- [`errors.New`] for errors with simple static strings
-- [`fmt.Errorf`] for formatted error strings
-- Custom types that implement an `Error()` method
-- Wrapped errors using [`"pkg/errors".Wrap`]
+- [`errors.New`] 간단한 정적 문자열(simple static strings)과 함께하는 에러
+- [`fmt.Errorf`] 형식화된 오류 문자열
+- `Error()` 메서드를 구현한 커스텀 타입 (Custom types)
+- [`"pkg/errors".Wrap`]를 사용하여 래핑 된(wrapped) 오류
 
-When returning errors, consider the following to determine the best choice:
+오류를 반환할 때, 가장 좋은 선택을 하기 위해서 아래의 사항을 고려하라:
 
-- Is this a simple error that needs no extra information? If so, [`errors.New`]
-  should suffice.
-- Do the clients need to detect and handle this error? If so, you should use a
-  custom type, and implement the `Error()` method.
-- Are you propagating an error returned by a downstream function? If so, check
-  the [section on error wrapping](#error-wrapping).
-- Otherwise, [`fmt.Errorf`] is okay.
+- 추가 정보가 필요없는 간단한 에러인가? 그렇다면, [`errors.New`]가 충분하다.
+- 클라이언트가 오류를 감지하고 처리(handle)해야 하는가? 그렇다면, 커스텀 타입을 사용해야 하고 `Error()` 메서드를 구현해야 한다.
+- 다운스트림 함수(downstream function)에 의해 반환된 에러를 전파(propagating)하고 있는가? 그렇다면, [section on error wrapping](#error-wrapping)을 참고하라.
+- 이외의 경우, [`fmt.Errorf`] 로 충분하다.
 
   [`errors.New`]: https://golang.org/pkg/errors/#New
   [`fmt.Errorf`]: https://golang.org/pkg/fmt/#Errorf
   [`"pkg/errors".Wrap`]: https://godoc.org/github.com/pkg/errors#Wrap
 
-If the client needs to detect the error, and you have created a simple error
-using [`errors.New`], use a var for the error.
+만약 클라이언트가 오류를 감지해야 하고, 여러분들이 [`errors.New`]을 사용하여 간단한 에러를 생성한 경우, `var`에 에러를 사용해라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -600,9 +596,7 @@ if err := foo.Open(); err != nil {
 </td></tr>
 </tbody></table>
 
-If you have an error that clients may need to detect, and you would like to add
-more information to it (e.g., it is not a static string), then you should use a
-custom type.
+만약 클라이언트가 감지해야 할 오류가 있고 여러분들이 이를 추가하려고 하는 경우, 그것에 대한 자세한 정보를 추가하고 싶을 것이다. (예를들어, 정적 문자열이 아닌 경우), 이러할 경우, 여러분들은 커스텀 타입을 사용해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -654,9 +648,7 @@ func use() {
 </td></tr>
 </tbody></table>
 
-Be careful with exporting custom error types directly since they become part of
-the public API of the package. It is preferable to expose matcher functions to
-check the error instead.
+사용자 정의 오류 타입(custom error types)을 직접적으로 내보내는(exporting) 경우 주의해야 한다. 왜냐하면 그들은 패키지의 공용 API (the public API of the package)의 일부가 되기 때문이다. 대신에, 오류를 확인하기 위해서 매처 함수(matcher functions)를 노출하는 것이 좋다(preferable).
 
 ```go
 // package foo
