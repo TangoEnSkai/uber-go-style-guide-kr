@@ -65,8 +65,8 @@ row before the </tbody></table> line.
     - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4%ec%97%90-%eb%8c%80%ed%95%9c-%ed%8f%ac%ec%9d%b8%ed%84%b0-pointers-to-interfaces)
     - [수신자(Receivers)와 인터페이스(Interfaces)](#%ec%88%98%ec%8b%a0%ec%9e%90receivers%ec%99%80-%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4interfaces)
     - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#%ec%a0%9c%eb%a1%9c-%ea%b0%92-%eb%ae%a4%ed%85%8d%ec%8a%a4zero-value-mutexes%eb%8a%94-%ec%9c%a0%ed%9a%a8%ed%95%98%eb%8b%a4)
-    - [Copy Slices and Maps at Boundaries](#copy-slices-and-maps-at-boundaries)
-      - [Receiving Slices and Maps](#receiving-slices-and-maps)
+    - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-%eb%b3%b5%ec%82%accopy-slices%ec%99%80-%eb%b0%94%ec%9a%b4%eb%8d%94%eb%a6%ac-%ec%97%90%ec%84%9c%ec%9d%98-%eb%a7%b5maps-at-boundaries)
+      - [Slices와 Maps의 수신(receiving)](#slices%ec%99%80-maps%ec%9d%98-%ec%88%98%ec%8b%a0receiving)
       - [Returning Slices and Maps](#returning-slices-and-maps)
     - [Defer to Clean Up](#defer-to-clean-up)
     - [Channel Size is One or None](#channel-size-is-one-or-none)
@@ -294,15 +294,13 @@ func (m *SMap) Get(k string) string {
 
 </tbody></table>
 
-### Copy Slices and Maps at Boundaries
+### 슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)
 
-Slices and maps contain pointers to the underlying data so be wary of scenarios
-when they need to be copied.
+슬라이스(Slices)와 맵(maps)은 기본 데이터(underlying data)에 대한 포인터를 포함하고 있으므로 이들을 복사 해야 할 때의 시나리오에 대해서 주의할 필요가 있다.  
 
-#### Receiving Slices and Maps
+#### Slices와 Maps의 수신(receiving)
 
-Keep in mind that users can modify a map or slice you received as an argument
-if you store a reference to it.
+참조/레퍼런스(reference)를 저장할 경우, 사용자는 인수(argument)로 받는 맵 혹은 슬라이스를 수정할 수 있음을 명심하라.
 
 <table>
 <thead><tr><th>Bad</th> <th>Good</th></tr></thead>
@@ -318,7 +316,7 @@ func (d *Driver) SetTrips(trips []Trip) {
 trips := ...
 d1.SetTrips(trips)
 
-// Did you mean to modify d1.trips?
+// d1.trips을 수정할 것을 의미하는가?
 trips[0] = ...
 ```
 
@@ -334,7 +332,7 @@ func (d *Driver) SetTrips(trips []Trip) {
 trips := ...
 d1.SetTrips(trips)
 
-// We can now modify trips[0] without affecting d1.trips.
+// 이제 d1.trips에 영향을 주지 않고서 trips[0]을 수정 할 수 있다.
 trips[0] = ...
 ```
 
