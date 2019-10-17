@@ -72,7 +72,7 @@ row before the </tbody></table> line.
     - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#%ec%b1%84%eb%84%90%ec%9d%98-%ed%81%ac%ea%b8%b0channel-size%eb%8a%94-%ed%95%98%eb%82%98one-%ed%98%b9%ec%9d%80-%ec%a0%9c%eb%a1%9cnone)
     - [Enums은 1에서부터 시작하라](#enums%ec%9d%80-1%ec%97%90%ec%84%9c%eb%b6%80%ed%84%b0-%ec%8b%9c%ec%9e%91%ed%95%98%eb%9d%bc)
     - [에러 형(Error Types)](#%ec%97%90%eb%9f%ac-%ed%98%95error-types)
-    - [Error Wrapping](#error-wrapping)
+    - [오류 래핑(Error Wrapping)](#%ec%98%a4%eb%a5%98-%eb%9e%98%ed%95%91error-wrapping)
     - [Handle Type Assertion Failures](#handle-type-assertion-failures)
     - [Don't Panic](#dont-panic)
     - [Use go.uber.org/atomic](#use-gouberorgatomic)
@@ -537,7 +537,7 @@ const (
 
 - 추가 정보가 필요없는 간단한 에러인가? 그렇다면, [`errors.New`]가 충분하다.
 - 클라이언트가 오류를 감지하고 처리(handle)해야 하는가? 그렇다면, 커스텀 타입을 사용해야 하고 `Error()` 메서드를 구현해야 한다.
-- 다운스트림 함수(downstream function)에 의해 반환된 에러를 전파(propagating)하고 있는가? 그렇다면, [section on error wrapping](#error-wrapping)을 참고하라.
+- 다운스트림 함수(downstream function)에 의해 반환된 에러를 전파(propagating)하고 있는가? 그렇다면, [오류 포장(Error Wrapping)](#%ec%98%a4%eb%a5%98-%eb%9e%98%ed%95%91error-wrapping)을 참고하라.
 - 이외의 경우, [`fmt.Errorf`] 로 충분하다.
 
   [`errors.New`]: https://golang.org/pkg/errors/#New
@@ -683,25 +683,17 @@ if err := foo.Open("foo"); err != nil {
 
 <!-- TODO: Exposing the information to callers with accessor functions. -->
 
-### Error Wrapping
+### 오류 래핑(Error Wrapping)
 
-There are three main options for propagating errors if a call fails:
+호출이 실패할 경우 에러를 전파(propagating)하기 위한 3가지 주요 옵션이 있다:
 
-- Return the original error if there is no additional context to add and you
-  want to maintain the original error type.
-- Add context using [`"pkg/errors".Wrap`] so that the error message provides
-  more context and [`"pkg/errors".Cause`] can be used to extract the original
-  error.
-- Use [`fmt.Errorf`] if the callers do not need to detect or handle that
-  specific error case.
+- 추가적인 컨텍스트(additional context)가 없고 원래의 에러 타입을 유지하려는 경우 본래의 에러(original error)를 반환하라.
+- 에러 메시지가 더 많은 컨텍스트를 제공하면서 [`"pkg/errors".Cause`]가 원래 오류를 추출하는데 사용될 수 있도록 [`"pkg/errors".Wrap`]을 사용하여 컨텍스트를 추가하라.
+- 호출자(callers)가 특정한 에러 케이스를(specific error case)를 감지하거나 다룰(handle) 필요가 없는 경우 [`fmt.Errorf`]를 사용하라.
 
-It is recommended to add context where possible so that instead of a vague
-error such as "connection refused", you get more useful errors such as
-"call service foo: connection refused".
+"connection refused"와 같은 모호한 오류보다, 컨첵스트를 추가하는 것을 추천한다. 따라서 여러분들은 "call service foo: connection refused."와 같이 더욱 유용한 에러를 얻을 수 있을 것이다.
 
-When adding context to returned errors, keep the context succinct by avoiding
-phrases like "failed to", which state the obvious and pile up as the error
-percolates up through the stack:
+반환된 오류에서 컨텍스트를 추가 할 때, "failed to"와 같은 사족의 명백한 문구를 피하며 컨텍스트를 간결하게 유지하도록 해라. 이러한 문구들이 에러가 스택에 퍼지면서/스며들면서(percolates) 계속해서 쌓이게 된다:
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -741,10 +733,9 @@ x: y: new store: the error
 </td></tr>
 </tbody></table>
 
-However once the error is sent to another system, it should be clear the
-message is an error (e.g. an `err` tag or "Failed" prefix in logs).
+그러나, 일단 오류가 다른 시스템으로 전송되면, 그 메시지가 오류임은 분명히 해야 한다. (예를들어 `err` 태그(tag) 혹은 로그에서의 "Failed" 접두사 사용)
 
-See also [Don't just check errors, handle them gracefully].
+또한 다음의 글을 참고하라: [Don't just check errors, handle them gracefully].
 
   [`"pkg/errors".Cause`]: https://godoc.org/github.com/pkg/errors#Cause
   [Don't just check errors, handle them gracefully]: https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
