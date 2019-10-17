@@ -73,7 +73,7 @@ row before the </tbody></table> line.
     - [Enums은 1에서부터 시작하라](#enums%ec%9d%80-1%ec%97%90%ec%84%9c%eb%b6%80%ed%84%b0-%ec%8b%9c%ec%9e%91%ed%95%98%eb%9d%bc)
     - [에러 형(Error Types)](#%ec%97%90%eb%9f%ac-%ed%98%95error-types)
     - [오류 래핑(Error Wrapping)](#%ec%98%a4%eb%a5%98-%eb%9e%98%ed%95%91error-wrapping)
-    - [Handle Type Assertion Failures](#handle-type-assertion-failures)
+    - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#%ed%83%80%ec%9e%85%ec%9d%98-%ec%96%b4%ec%84%a4%ec%85%98-%ec%8b%a4%ed%8c%a8-%eb%8b%a4%eb%a3%a8%ea%b8%b0-handle-type-assertion-failures)
     - [Don't Panic](#dont-panic)
     - [Use go.uber.org/atomic](#use-gouberorgatomic)
   - [Performance](#performance)
@@ -740,10 +740,9 @@ x: y: new store: the error
   [`"pkg/errors".Cause`]: https://godoc.org/github.com/pkg/errors#Cause
   [Don't just check errors, handle them gracefully]: https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
 
-### Handle Type Assertion Failures
+### 타입의 어설션 실패 다루기 (Handle Type Assertion Failures)
 
-The single return value form of a [type assertion] will panic on an incorrect
-type. Therefore, always use the "comma ok" idiom.
+[type assertion]의 단일 반환 값 형식(the single return value form)은 잘못된 타입에 패닉 상태가 된다. 따라서 항상 "comma ok" 관용구(idiom)을 사용하는 것을 권장한다. 
 
   [type assertion]: https://golang.org/ref/spec#Type_assertions
 
