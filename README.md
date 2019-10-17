@@ -79,29 +79,29 @@ row before the </tbody></table> line.
   - [성능(Performance)](#%ec%84%b1%eb%8a%a5performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-%eb%b3%b4%eb%8b%a4-strconv-%ec%84%a0%ed%98%b8)
     - [string-to-byte 변환을 피해라](#string-to-byte-%eb%b3%80%ed%99%98%ec%9d%84-%ed%94%bc%ed%95%b4%eb%9d%bc)
-  - [Style](#style)
-    - [Group Similar Declarations](#group-similar-declarations)
-    - [Import Group Ordering](#import-group-ordering)
-    - [Package Names](#package-names)
-    - [Function Names](#function-names)
-    - [Import Aliasing](#import-aliasing)
-    - [Function Grouping and Ordering](#function-grouping-and-ordering)
-    - [Reduce Nesting](#reduce-nesting)
-    - [Unnecessary Else](#unnecessary-else)
-    - [Top-level Variable Declarations](#top-level-variable-declarations)
-    - [Prefix Unexported Globals with _](#prefix-unexported-globals-with)
-    - [Embedding in Structs](#embedding-in-structs)
-    - [Use Field Names to initialize Structs](#use-field-names-to-initialize-structs)
-    - [Local Variable Declarations](#local-variable-declarations)
-    - [nil is a valid slice](#nil-is-a-valid-slice)
-    - [Reduce Scope of Variables](#reduce-scope-of-variables)
-    - [Avoid Naked Parameters](#avoid-naked-parameters)
-    - [Use Raw String Literals to Avoid Escaping](#use-raw-string-literals-to-avoid-escaping)
-    - [Initializing Struct References](#initializing-struct-references)
-    - [Format Strings outside Printf](#format-strings-outside-printf)
-    - [Naming Printf-style Functions](#naming-printf-style-functions)
-  - [Patterns](#patterns)
-    - [Test Tables](#test-tables)
+  - [스타일 (Style)](#%ec%8a%a4%ed%83%80%ec%9d%bc-style)
+    - [그룹 유사 선언 (Group Similar Declarations)](#%ea%b7%b8%eb%a3%b9-%ec%9c%a0%ec%82%ac-%ec%84%a0%ec%96%b8-group-similar-declarations)
+    - [Import 그룹 정리/배치 (Import Group Ordering)](#import-%ea%b7%b8%eb%a3%b9-%ec%a0%95%eb%a6%ac%eb%b0%b0%ec%b9%98-import-group-ordering)
+    - [패키지 이름 (Package Names)](#%ed%8c%a8%ed%82%a4%ec%a7%80-%ec%9d%b4%eb%a6%84-package-names)
+    - [함수 이름 (Function Names)](#%ed%95%a8%ec%88%98-%ec%9d%b4%eb%a6%84-function-names)
+    - [Import 별칭 (Import Aliasing)](#import-%eb%b3%84%ec%b9%ad-import-aliasing)
+    - [함수 그룹화와 정렬/배치 (Function Grouping and Ordering)](#%ed%95%a8%ec%88%98-%ea%b7%b8%eb%a3%b9%ed%99%94%ec%99%80-%ec%a0%95%eb%a0%ac%eb%b0%b0%ec%b9%98-function-grouping-and-ordering)
+    - [중첩 감소 (Reduce Nesting)](#%ec%a4%91%ec%b2%a9-%ea%b0%90%ec%86%8c-reduce-nesting)
+    - [불필요한 else (Unnecessary Else)](#%eb%b6%88%ed%95%84%ec%9a%94%ed%95%9c-else-unnecessary-else)
+    - [최상위 변수 선언 (Top-level Variable Declarations)](#%ec%b5%9c%ec%83%81%ec%9c%84-%eb%b3%80%ec%88%98-%ec%84%a0%ec%96%b8-top-level-variable-declarations)
+    - [수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)](#%ec%88%98%ec%b6%9c%eb%90%98%ec%a7%80-%ec%95%8a%ec%9d%80-%ec%a0%84%ec%97%ad%ec%97%90-%ec%9d%84-%eb%b6%99%ec%97%ac%eb%9d%bc-prefix-unexported-globals-with)
+    - [구조체에서의 임베딩 (Embedding in Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4%ec%97%90%ec%84%9c%ec%9d%98-%ec%9e%84%eb%b2%a0%eb%94%a9-embedding-in-structs)
+    - [구조체 초기화를 위해 필드을 사용해라 (Use Field Names to initialize Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4-%ec%b4%88%ea%b8%b0%ed%99%94%eb%a5%bc-%ec%9c%84%ed%95%b4-%ed%95%84%eb%93%9c%ec%9d%84-%ec%82%ac%ec%9a%a9%ed%95%b4%eb%9d%bc-use-field-names-to-initialize-structs)
+    - [지역 변수 선언 (Local Variable Declarations)](#%ec%a7%80%ec%97%ad-%eb%b3%80%ec%88%98-%ec%84%a0%ec%96%b8-local-variable-declarations)
+    - [nil은 유효한 슬라이스 (nil is a valid slice)](#nil%ec%9d%80-%ec%9c%a0%ed%9a%a8%ed%95%9c-%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-nil-is-a-valid-slice)
+    - [변수의 범위를 줄여라 (Reduce Scope of Variables)](#%eb%b3%80%ec%88%98%ec%9d%98-%eb%b2%94%ec%9c%84%eb%a5%bc-%ec%a4%84%ec%97%ac%eb%9d%bc-reduce-scope-of-variables)
+    - [Naked 매개변수를 피해라 (Avoid Naked Parameters)](#naked-%eb%a7%a4%ea%b0%9c%eb%b3%80%ec%88%98%eb%a5%bc-%ed%94%bc%ed%95%b4%eb%9d%bc-avoid-naked-parameters)
+    - [이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)](#%ec%9d%b4%ec%8a%a4%ec%bc%80%ec%9d%b4%ed%95%91%ec%9d%84-%ed%94%bc%ed%95%98%ea%b8%b0-%ec%9c%84%ed%95%b4-%ec%9b%90%ec%8b%9c-%eb%ac%b8%ec%9e%90-%eb%a6%ac%ed%84%b0%eb%9f%b4-%ec%82%ac%ec%9a%a9-use-raw-string-literals-to-avoid-escaping)
+    - [구조체 참조 초기화 (Initializing Struct References)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4-%ec%b0%b8%ec%a1%b0-%ec%b4%88%ea%b8%b0%ed%99%94-initializing-struct-references)
+    - [Printf외부의 문자열 형식 (Format Strings outside Printf)](#printf%ec%99%b8%eb%b6%80%ec%9d%98-%eb%ac%b8%ec%9e%90%ec%97%b4-%ed%98%95%ec%8b%9d-format-strings-outside-printf)
+    - [Printf-스타일 함수의 이름 (Naming Printf-style Functions)](#printf-%ec%8a%a4%ed%83%80%ec%9d%bc-%ed%95%a8%ec%88%98%ec%9d%98-%ec%9d%b4%eb%a6%84-naming-printf-style-functions)
+  - [패턴 (Patterns)](#%ed%8c%a8%ed%84%b4-patterns)
+    - [테스트 테이블 (Test Tables)](#%ed%85%8c%ec%8a%a4%ed%8a%b8-%ed%85%8c%ec%9d%b4%eb%b8%94-test-tables)
     - [Functional Options](#functional-options)
 
 ## 소개 (Introduction)
@@ -1000,11 +1000,11 @@ BenchmarkGood-4  500000000   3.25 ns/op
 </td></tr>
 </tbody></table>
 
-## Style
+## 스타일 (Style)
 
-### Group Similar Declarations
+### 그룹 유사 선언 (Group Similar Declarations)
 
-Go supports grouping similar declarations.
+Go는 유사한 선언 그룹화를 지원한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1028,7 +1028,7 @@ import (
 </td></tr>
 </tbody></table>
 
-This also applies to constants, variables, and type declarations.
+이는 또한 상수, 변수, 그리고 타입 선언에서도 유효하다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1073,7 +1073,7 @@ type (
 </td></tr>
 </tbody></table>
 
-Only group related declarations. Do not group declarations that are unrelated.
+오직 관련된 선언만 그룹화 할 것. 관련되지 않은 선언들에 대해서는 그룹화 하지 말것.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1108,8 +1108,7 @@ const ENV_VAR = "MY_ENV"
 </td></tr>
 </tbody></table>
 
-Groups are not limited in where they can be used. For example, you can use them
-inside of functions.
+그룹화를 사용하는 장소는 제한되어 있지 않다. 예를 들어, 함수 내에서 그룹화는 사용 가능 하다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1143,14 +1142,14 @@ func f() string {
 </td></tr>
 </tbody></table>
 
-### Import Group Ordering
+### Import 그룹 정리/배치 (Import Group Ordering)
 
-There should be two import groups:
+2가지 import 그룹들이 존재한다:
 
-- Standard library
-- Everything else
+- 표준 라이브러리 (Standard library)
+- 그 외 모든 것 (Everything else)
 
-This is the grouping applied by goimports by default.
+이는 디폴트로 `goimports`에 의해서 적용되는 그룹들이다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1181,35 +1180,30 @@ import (
 </td></tr>
 </tbody></table>
 
-### Package Names
+### 패키지 이름 (Package Names)
 
-When naming packages, choose a name that is:
+패키지 이름을 정할 때, 아래와 같은 이름을 선택하라:
 
-- All lower-case. No capitals or underscores.
-- Does not need to be renamed using named imports at most call sites.
-- Short and succinct. Remember that the name is identified in full at every call
-  site.
-- Not plural. For example, `net/url`, not `net/urls`.
-- Not "common", "util", "shared", or "lib". These are bad, uninformative names.
+- 모두 알파벳 소문자 사용, 대문자와 언더스코어 (_)는 사용하지 말 것.
+- 대부분의 호출 지점(call sites)에서 named import를 사용하여 재명명(renamed)을 할 필요가 없다.
+- 짧고 간결하게. 이름(name)은 모든 호출 지점(call site)에서 식별됨을 상기하라.
+- 복수형(plural) 사용 금지. 예를 들어, `net/urls` 가 아닌 `net/url`.
+- "common", "util", "shared", 또는 "lib"의 용어 사용 금지. 정보가 없는 나쁜 이름들임.
 
-See also [Package Names] and [Style guideline for Go packages].
+또한 [Package Names] 와 [Style guideline for Go packages]를 참고하기 바란다.
 
   [Package Names]: https://blog.golang.org/package-names
   [Style guideline for Go packages]: https://rakyll.org/style-packages/
 
-### Function Names
+### 함수 이름 (Function Names)
 
-We follow the Go community's convention of using [MixedCaps for function
-names]. An exception is made for test functions, which may contain underscores
-for the purpose of grouping related test cases, e.g.,
-`TestMyFunction_WhatIsBeingTested`.
+우리는 Go 커뮤니티의 [MixedCaps for function names]의 사용에 의한 컨벤션을 따른다. 테스트 함수(test functions)는 예외이다. 이는 관련 테스트케이스를 그룹화 할 목적으로 언더스코어(_)를 포함할 수 있다, 예를들어, `TestMyFunction_WhatIsBeingTested`.
 
   [MixedCaps for function names]: https://golang.org/doc/effective_go.html#mixed-caps
 
-### Import Aliasing
+### Import 별칭 (Import Aliasing)
 
-Import aliasing must be used if the package name does not match the last
-element of the import path.
+패키지 이름이 import path의 마지막 요소와 일치하지 않을 경우 별명을 사용해야 한다.
 
 ```go
 import (
@@ -1220,8 +1214,7 @@ import (
 )
 ```
 
-In all other scenarios, import aliases should be avoided unless there is a
-direct conflict between imports.
+다른 모든 시나리오의 경우, import 별칭의 사용은 import하면서 두 import간 직접적 충돌(import direct conflict)이 발생하지 않는 한 지양해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1253,19 +1246,17 @@ import (
 </td></tr>
 </tbody></table>
 
-### Function Grouping and Ordering
+### 함수 그룹화와 정렬/배치 (Function Grouping and Ordering)
 
-- Functions should be sorted in rough call order.
-- Functions in a file should be grouped by receiver.
+- 함수는 대략적 호출 순서에 의해서 정렬되어야 한다.
+- 파일내에서의 함수는 리시버에 의해서 그룹지어져야 한다.
 
-Therefore, exported functions should appear first in a file, after
-`struct`, `const`, `var` definitions.
+그러므로, 수출되는 함수 (exported function)는 파일 내의 `struct`, `const`, `var`의 정의 구문 이후의 시작 부분에 나타나야 한다.
 
-A `newXYZ()`/`NewXYZ()` may appear after the type is defined, but before the
-rest of the methods on the receiver.
+`newXYZ()`/`NewXYZ()`가 타입이 정의된 뒷부분에 나타날 수 있지만, 이는 나머지 수신자(receiver)의 메서드들 전에 나타나야 한다 (may appear after the type is defined, but before the
+rest of the methods on the receiver.)
 
-Since functions are grouped by receiver, plain utility functions should appear
-towards the end of the file.
+함수들은 수신자에 의해 그룹화 되므로, 일반 유틸리티 함수들(plain utility functions)는 파일의 뒷부분에 나타나야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1309,11 +1300,9 @@ func calcCost(n []int) int {...}
 </td></tr>
 </tbody></table>
 
-### Reduce Nesting
+### 중첩 감소 (Reduce Nesting)
 
-Code should reduce nesting where possible by handling error cases/special
-conditions first and returning early or continuing the loop. Reduce the amount
-of code that is nested multiple levels.
+코드는 에러 케이스 혹은 특수 조건(error cases / special conditions)을 먼저 처리하고 루프를 일찍 리턴하거나 계속 지속함으로써 가능한 중첩(nesting)을 줄일 수 있어야 한다. 여러 레벨로 중첩된(nested multiple levels)코드의 양을 줄이도록 해라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1355,10 +1344,9 @@ for _, v := range data {
 </td></tr>
 </tbody></table>
 
-### Unnecessary Else
+### 불필요한 else (Unnecessary Else)
 
-If a variable is set in both branches of an if, it can be replaced with a
-single if.
+변수가 if의 두 가지 분기문에 의해서 설정될 경우, 이는 단일 `if`문 (simple if)으로 대체 될 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1386,10 +1374,9 @@ if b {
 </td></tr>
 </tbody></table>
 
-### Top-level Variable Declarations
+### 최상위 변수 선언 (Top-level Variable Declarations)
 
-At the top level, use the standard `var` keyword. Do not specify the type,
-unless it is not the same type as the expression.
+최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식(expression)r과같은 같은 타입이 아닌 이상, 타입을 특정짓지 말라. 
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1406,8 +1393,8 @@ func F() string { return "A" }
 
 ```go
 var _s = F()
-// Since F already states that it returns a string, we don't need to specify
-// the type again.
+// F는 이미 문자열을 반환한다고 명시하고 있기 때문에
+// 타입을 다시 지정할 필요가 없다.
 
 func F() string { return "A" }
 ```
@@ -1415,8 +1402,7 @@ func F() string { return "A" }
 </td></tr>
 </tbody></table>
 
-Specify the type if the type of the expression does not match the desired type
-exactly.
+표현식의 타입이 원하는 타입과 정확하게 일치하지 않는 경우 타입을 지정해라.
 
 ```go
 type myError struct{}
@@ -1426,19 +1412,16 @@ func (myError) Error() string { return "error" }
 func F() myError { return myError{} }
 
 var _e error = F()
-// F returns an object of type myError but we want error.
+// F는 myError 타입의 객체를 반환하지만, 우리가 원하는 것은 error
 ```
 
-### Prefix Unexported Globals with _
+### 수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)
 
-Prefix unexported top-level `var`s and `const`s with `_` to make it clear when
-they are used that they are global symbols.
+수출되지 않은 최상위(top-level) `var`와 `const`에 접두사 `_`를 붙임으로써 그들이 사용될 때, 전역 기호(global symbols)임을 명확하게 해라.
 
-Exception: Unexported error values, which should be prefixed with `err`.
+예외: 수출되지 않는 에러 값 (Unexported error values)은 `err`의 접두사를 가져야 한다.
 
-Rationale: Top-level variables and constants have a package scope. Using a
-generic name makes it easy to accidentally use the wrong value in a different
-file.
+이유: 최상위 변수 및 상수 (Top-level variables and constants)는 패키지 범위(package scope)를 가진다. 제네릭 이름(generic names)을 사용하는 것은 다른 파일에서 잘못된 값을 실수로 쉽게 사용할 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1460,8 +1443,8 @@ func Bar() {
   ...
   fmt.Println("Default port", defaultPort)
 
-  // We will not see a compile error if the first line of
-  // Bar() is deleted.
+  // 만약 Bar()의 첫번째 라인이 지워지면
+  // 컴파일 에러에 직면하지 않는다.
 }
 ```
 
@@ -1479,11 +1462,9 @@ const (
 </td></tr>
 </tbody></table>
 
-### Embedding in Structs
+### 구조체에서의 임베딩 (Embedding in Structs)
 
-Embedded types (such as mutexes) should be at the top of the field list of a
-struct, and there must be an empty line separating embedded fields from regular
-fields.
+뮤텍스와 같은 임베드된 타입은 구조체의 필드 목록 가장 상위층에 있어야 하고, 임베드 된 필드를 일반 필드와 분리하는 empty ilie이 있어야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1510,10 +1491,9 @@ type Client struct {
 </td></tr>
 </tbody></table>
 
-### Use Field Names to initialize Structs
+### 구조체 초기화를 위해 필드을 사용해라 (Use Field Names to initialize Structs)
 
-You should almost always specify field names when initializing structs. This is
-now enforced by [`go vet`].
+구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
 
   [`go vet`]: https://golang.org/cmd/vet/
 
@@ -1539,8 +1519,7 @@ k := User{
 </td></tr>
 </tbody></table>
 
-Exception: Field names *may* be omitted in test tables when there are 3 or
-fewer fields.
+예외: 테스트 테이블에서 필드명은 3개 일때 혹은 이보다 적을 때 생략될 수 있음.
 
 ```go
 tests := []struct{
@@ -1552,10 +1531,9 @@ tests := []struct{
 }
 ```
 
-### Local Variable Declarations
+### 지역 변수 선언 (Local Variable Declarations)
 
-Short variable declarations (`:=`) should be used if a variable is being set to
-some value explicitly.
+변수를 명시적으로 특정 값으로 설정하는 경우 짧은 변수 선언 (Short variable declarations, `:=`)을 사용해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1575,8 +1553,7 @@ s := "foo"
 </td></tr>
 </tbody></table>
 
-However, there are cases where the default value is clearer when the `var`
-keyword is use. [Declaring Empty Slices], for example.
+그러나, `var` 키워드를 사용할 때 기본값(default value)가 더 명확할 때가 있다. 예를 들면, [Declaring Empty Slices].
 
   [Declaring Empty Slices]: https://github.com/golang/go/wiki/CodeReviewComments#declaring-empty-slices
 
@@ -1612,12 +1589,11 @@ func f(list []int) {
 </td></tr>
 </tbody></table>
 
-### nil is a valid slice
+### nil은 유효한 슬라이스 (nil is a valid slice)
 
-`nil` is a valid slice of length 0. This means that,
+`nil`은 길이가 0인 유요한 슬라이스이다. 이는 다음과 같음을 의미한다:
 
-- You should not return a slice of length zero explicitly. Return `nil`
-  instead.
+- 길이가 0인 슬라이스를 명시적으로 반환해서는 안된다. 대신 nil을 반환하라.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1641,8 +1617,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- To check if a slice is empty, always use `len(s) == 0`. Do not check for
-  `nil`.
+- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용해라. `nil`을 체크하지 말 것.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1666,8 +1641,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- The zero value (a slice declared with `var`) is usable immediately without
-  `make()`.
+- 제로 값(The zero value), `var`로 선언된 슬라이스의 경우,은 `make()`없이 바로 사용 할 수 있다.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1704,10 +1678,9 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-### Reduce Scope of Variables
+### 변수의 범위를 줄여라 (Reduce Scope of Variables)
 
-Where possible, reduce scope of variables. Do not reduce the scope if it
-conflicts with [Reduce Nesting](#reduce-nesting).
+가능한 변수의 범위를 줄여라. 만약 [Reduce Nesting](#reduce-nesting)과의 출돌하는 경우 범위를 줄이면 안된다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1732,8 +1705,7 @@ if err := ioutil.WriteFile(name, data, 0644); err != nil {
 </td></tr>
 </tbody></table>
 
-If you need a result of a function call outside of the if, then you should not
-try to reduce the scope.
+`if`외부에서 함수 호출의 결과가 필요한 경우, 범위를 줄이려고 시도해서는 안된다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1773,10 +1745,9 @@ return nil
 </td></tr>
 </tbody></table>
 
-### Avoid Naked Parameters
+### Naked 매개변수를 피해라 (Avoid Naked Parameters)
 
-Naked parameters in function calls can hurt readability. Add C-style comments
-(`/* ... */`) for parameter names when their meaning is not obvious.
+함수 호출에서의 naked parameteres는 가독성을 떨어 뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하기 바란다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1800,9 +1771,7 @@ printInfo("foo", true /* isLocal */, true /* done */)
 </td></tr>
 </tbody></table>
 
-Better yet, replace naked `bool` types with custom types for more readable and
-type-safe code. This allows more than just two states (true/false) for that
-parameter in the future.
+더 나은 방법은, naked `bool` 타입을 더 읽기 쉽고 타입-안정적(type-safe)인 코드를 위해서 사용자 정의 타입(custom type)으로 대체해라. 이를 통해서 향후 해당 매개변수에 대해서 두개 이상의 상태 (true/false)를 허용할 수 있다.
 
 ```go
 type Region int
@@ -1817,17 +1786,15 @@ type Status int
 const (
   StatusReady = iota + 1
   StatusDone
-  // Maybe we will have a StatusInProgress in the future.
+  // 향후에 StatusInProgress를 추가할 수 있다.
 )
 
 func printInfo(name string, region Region, status Status)
 ```
 
-### Use Raw String Literals to Avoid Escaping
+### 이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)
 
-Go supports [raw string literals](https://golang.org/ref/spec#raw_string_lit),
-which can span multiple lines and include quotes. Use these to avoid
-hand-escaped strings which are much harder to read.
+Go는 [raw string literals](https://golang.org/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸쳐친 코드와 따옴표를 함께 포함할 수 있다. 읽기 어려운 hand-escaped strings를 피하기 위해서 원시 문자 리터럴을 사용해라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1847,10 +1814,9 @@ wantError := `unknown error:"test"`
 </td></tr>
 </tbody></table>
 
-### Initializing Struct References
+### 구조체 참조 초기화 (Initializing Struct References)
 
-Use `&T{}` instead of `new(T)` when initializing struct references so that it
-is consistent with the struct initialization.
+구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 해라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1876,12 +1842,11 @@ sptr := &T{Name: "bar"}
 </td></tr>
 </tbody></table>
 
-### Format Strings outside Printf
+### Printf외부의 문자열 형식 (Format Strings outside Printf)
 
-If you declare format strings for `Printf`-style functions outside a string
-literal, make them `const` values.
+문자열 리터럴 외부의 `Printf`-스타일의 함수에 대한 형식 문자열(format strings)을 선언하는 경우 `const`값 (const value)로 만들라.
 
-This helps `go vet` perform static analysis of the format string.
+이는 `go vet`이 형식 문자열의 정적 분석(static analysis) 수행하는데 도움이 된다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1903,35 +1868,29 @@ fmt.Printf(msg, 1, 2)
 </td></tr>
 </tbody></table>
 
-### Naming Printf-style Functions
+### Printf-스타일 함수의 이름 (Naming Printf-style Functions)
 
-When you declare a `Printf`-style function, make sure that `go vet` can detect
-it and check the format string.
+`Printf`-스타일의 함수를 선언할 때, `go vet`이 이를 감지하고 형식 문자열 (format string)을 체크 할 수 있는지 확인해라.
 
-This means that you should use pre-defined `Printf`-style function
-names if possible. `go vet` will check these by default. See [Printf family]
-for more information.
+이것은 미리 정의 된 `Printf`-스타일 함수를 사용해야 한다는 것을 의미한다. `go vet`이 이를 디폴트로 체크한다. 자세한 정보는 다음을 참조하기 바란다: [Printf family]
 
   [Printf family]: https://golang.org/cmd/vet/#hdr-Printf_family
 
-If using the pre-defined names is not an option, end the name you choose with
-f: `Wrapf`, not `Wrap`. `go vet` can be asked to check specific `Printf`-style
-names but they must end with f.
+미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름을 f로 끝내도록 해라: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
 
 ```shell
 $ go vet -printfuncs=wrapf,statusf
 ```
 
-See also [go vet: Printf family check].
+또한 다음을 참고해라: [go vet: Printf family check].
 
   [go vet: Printf family check]: https://kuzminva.wordpress.com/2017/11/07/go-vet-printf-family-check/
 
-## Patterns
+## 패턴 (Patterns)
 
-### Test Tables
+### 테스트 테이블 (Test Tables)
 
-Use table-driven tests with [subtests] to avoid duplicating code when the core
-test logic is repetitive.
+핵심적 테스트 로직(the core test logic)이 반복적일 때, 코드 중복을 피하려면 [subtests]와 함께 table-driven tests를 사용해라.
 
   [subtests]: https://blog.golang.org/subtests
 
@@ -2009,12 +1968,9 @@ for _, tt := range tests {
 </td></tr>
 </tbody></table>
 
-Test tables make it easier to add context to error messages, reduce duplicate
-logic, and add new test cases.
+테스트 테이블을 사용하면 에러 메시지에 컨텍스트를 쉽게 추가하고, 중복된 로직을 줄일 수 있으며, 쉽게 새로운 테스트 케이스를 추가할 수 있다.
 
-We follow the convention that the slice of structs is referred to as `tests`
-and each test case `tt`. Further, we encourage explicating the input and output
-values for each test case with `give` and `want` prefixes.
+우리는 구조체 슬라이스를 `tests`라고 하고, 각 테스트 케이스를 `tt`라고 한다. 또한 각 테스트 케이스의 입력 및 출력 값을 `give` 및 `want` 접두어를 사용하여 설명(explicating)하는 것을 권장한다.
 
 ```go
 tests := []struct{
