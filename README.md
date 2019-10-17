@@ -62,7 +62,7 @@ row before the </tbody></table> line.
   - [가이드라인 (Guidelines)](#%ea%b0%80%ec%9d%b4%eb%93%9c%eb%9d%bc%ec%9d%b8-guidelines)
     - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4%ec%97%90-%eb%8c%80%ed%95%9c-%ed%8f%ac%ec%9d%b8%ed%84%b0-pointers-to-interfaces)
     - [수신자(Receivers)와 인터페이스(Interfaces)](#%ec%88%98%ec%8b%a0%ec%9e%90receivers%ec%99%80-%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4interfaces)
-    - [Zero-value Mutexes are Valid](#zero-value-mutexes-are-valid)
+    - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#%ec%a0%9c%eb%a1%9c-%ea%b0%92-%eb%ae%a4%ed%85%8d%ec%8a%a4zero-value-mutexes%eb%8a%94-%ec%9c%a0%ed%9a%a8%ed%95%98%eb%8b%a4)
     - [Copy Slices and Maps at Boundaries](#copy-slices-and-maps-at-boundaries)
       - [Receiving Slices and Maps](#receiving-slices-and-maps)
       - [Returning Slices and Maps](#returning-slices-and-maps)
@@ -206,10 +206,9 @@ Effective Go에 [Pointers vs. Values]에 대한 좋은 글이 있으니 참고�
 
   [Pointers vs. Values]: https://golang.org/doc/effective_go.html#pointers_vs_values
 
-### Zero-value Mutexes are Valid
+### 제로 값 뮤텍스(Zero-value Mutexes)는 유효하다
 
-The zero-value of `sync.Mutex` and `sync.RWMutex` is valid, so you almost
-never need a pointer to a mutex.
+`sync.Mutex`와 `sync.RWMutex` 의 제로 값은 유효하므로, 거의 대부분의 경우 뮤텍스에 대한 포인터는 필요로 하지 않는다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -231,10 +230,9 @@ mu.Lock()
 </td></tr>
 </tbody></table>
 
-If you use a struct by pointer, then the mutex can be a non-pointer field.
+포인터로 구조체를 사용할 경우, 뮤텍스는 포인터가 아닌 필드(non-pointer field)가 될 수 있다.
 
-Unexported structs that use a mutex to protect fields of the struct may embed
-the mutex.
+구조체의 필드를 보호하기 위해 뮤텍스를 사용한 수출되지 않는 구조체(unexported structs)는 뮤텍스를 포함(embed) 할 수 있다.
 
 <table>
 <tbody>
@@ -242,7 +240,7 @@ the mutex.
 
 ```go
 type smap struct {
-  sync.Mutex // only for unexported types
+  sync.Mutex // 오직 수출되지 않은 타입을 위해서 사용
 
   data map[string]string
 }
@@ -288,8 +286,8 @@ func (m *SMap) Get(k string) string {
 
 </tr>
 <tr>
-<td>Embed for private types or types that need to implement the Mutex interface.</td>
-<td>For exported types, use a private field.</td>
+<td>뮤텍스 인터페이스를 구현해야 하는 전용 타입(private type) 혹은 타입에 포함됨. </td>
+<td>수출되는 타입(exported type)에 대해서는 전용 필드 (private field)를 사용함.</td>
 </tr>
 
 </tbody></table>
