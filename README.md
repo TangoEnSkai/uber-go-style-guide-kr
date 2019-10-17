@@ -67,7 +67,7 @@ row before the </tbody></table> line.
     - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#%ec%a0%9c%eb%a1%9c-%ea%b0%92-%eb%ae%a4%ed%85%8d%ec%8a%a4zero-value-mutexes%eb%8a%94-%ec%9c%a0%ed%9a%a8%ed%95%98%eb%8b%a4)
     - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-%eb%b3%b5%ec%82%accopy-slices%ec%99%80-%eb%b0%94%ec%9a%b4%eb%8d%94%eb%a6%ac-%ec%97%90%ec%84%9c%ec%9d%98-%eb%a7%b5maps-at-boundaries)
       - [Slices와 Maps의 수신(receiving)](#slices%ec%99%80-maps%ec%9d%98-%ec%88%98%ec%8b%a0receiving)
-      - [Returning Slices and Maps](#returning-slices-and-maps)
+      - [슬라이스(Slices)와 맵(Maps)의 리턴](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4slices%ec%99%80-%eb%a7%b5maps%ec%9d%98-%eb%a6%ac%ed%84%b4)
     - [Defer to Clean Up](#defer-to-clean-up)
     - [Channel Size is One or None](#channel-size-is-one-or-none)
     - [Start Enums at One](#start-enums-at-one)
@@ -339,13 +339,12 @@ trips[0] = ...
 </td>
 </tr>
 
-</tbody>
+</tbody턴
 </table>
 
-#### Returning Slices and Maps
+#### 슬라이스(Slices)와 맵(Maps)의 리턴
 
-Similarly, be wary of user modifications to maps or slices exposing internal
-state.
+마찬가지로, 내부 상태(internal status)를 노출시키는 슬라이스나 맵에 대한 사용자의 수정에 주의하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -358,7 +357,7 @@ type Stats struct {
   counters map[string]int
 }
 
-// Snapshot returns the current stats.
+// Snapshot은 현재의 stats을 반환(return)한다
 func (s *Stats) Snapshot() map[string]int {
   s.mu.Lock()
   defer s.mu.Unlock()
@@ -366,8 +365,8 @@ func (s *Stats) Snapshot() map[string]int {
   return s.counters
 }
 
-// snapshot is no longer protected by the mutex, so any
-// access to the snapshot is racy.
+// snapshot은 더이상 뮤텍스에 의해서 보호되지 않는다.
+// 따라서, snapshot에 대한 access가 안정되지 않는다. (any access to the snapshot is racy.)
 snapshot := stats.Snapshot()
 ```
 
@@ -390,7 +389,7 @@ func (s *Stats) Snapshot() map[string]int {
   return result
 }
 
-// Snapshot is now a copy.
+// Snapshot는 카피(copy)다.
 snapshot := stats.Snapshot()
 ```
 
