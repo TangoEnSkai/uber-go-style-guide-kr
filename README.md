@@ -102,7 +102,7 @@ row before the </tbody></table> line.
     - [Printf-스타일 함수의 이름 (Naming Printf-style Functions)](#printf-%ec%8a%a4%ed%83%80%ec%9d%bc-%ed%95%a8%ec%88%98%ec%9d%98-%ec%9d%b4%eb%a6%84-naming-printf-style-functions)
   - [패턴 (Patterns)](#%ed%8c%a8%ed%84%b4-patterns)
     - [테스트 테이블 (Test Tables)](#%ed%85%8c%ec%8a%a4%ed%8a%b8-%ed%85%8c%ec%9d%b4%eb%b8%94-test-tables)
-    - [Functional Options](#functional-options)
+    - [기능적 옵션 (Functional Options)](#%ea%b8%b0%eb%8a%a5%ec%a0%81-%ec%98%b5%ec%85%98-functional-options)
 
 ## 소개 (Introduction)
 
@@ -1986,16 +1986,11 @@ for _, tt := range tests {
 }
 ```
 
-### Functional Options
+### 기능적 옵션 (Functional Options)
 
-Functional options is a pattern in which you declare an opaque `Option` type
-that records information in some internal struct. You accept a variadic number
-of these options and act upon the full information recorded by the options on
-the internal struct.
+기능적 옵션 (functional options)d은 일부 내부 구조체 (internal struct)에 정보를 기록하는 불투명한 `Option` 타입 (opaque option type)을 선언하는 패턴이다. 여러분들은 다양한 옵션 (variadic number of these options)을 받아들이고 내부 구조체의 옵션에 의해 기록된 모든 정보에 따라 행동하게 된다(act opon the full info. recorded by the options on the internal struct).
 
-Use this pattern for optional arguments in constructors and other public APIs
-that you foresee needing to expand, especially if you already have three or
-more arguments on those functions.
+확장 할 필요가 있는 생성자(constructors) 및 기타 공용 API (other public APIs)의 선택적 인수 (optional arguments), 특히나 해당하는 함수에 이미 3개 이상의 인수가 있는 경우에 이 패턴을 사용하기를 권장한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2085,7 +2080,7 @@ db.Connect(
 </td></tr>
 </tbody></table>
 
-See also,
+또한 다음을 참고하라,
 
 - [Self-referential functions and the design of options]
 - [Functional options for friendly APIs]
