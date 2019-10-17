@@ -2,7 +2,8 @@
 
 Translated in Korean  
 
-Currently WIP, but translation will done by 20th of Oct, 2019
+First translation done with original doc on 17th of Oct, 2019 from [uber-go/guide](https://github.com/uber-go/guide)
+Please feel free to fork and PR if you find any updates, issues or improvement.
 
 ---
 
