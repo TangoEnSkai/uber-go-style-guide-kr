@@ -76,9 +76,9 @@ row before the </tbody></table> line.
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#%ed%83%80%ec%9e%85%ec%9d%98-%ec%96%b4%ec%84%a4%ec%85%98-%ec%8b%a4%ed%8c%a8-%eb%8b%a4%eb%a3%a8%ea%b8%b0-handle-type-assertion-failures)
     - [패닉을 피할 것 (Don't Panic)](#%ed%8c%a8%eb%8b%89%ec%9d%84-%ed%94%bc%ed%95%a0-%ea%b2%83-dont-panic)
     - [go.uber.org/atomic의 사용](#gouberorgatomic%ec%9d%98-%ec%82%ac%ec%9a%a9)
-  - [Performance](#performance)
-    - [Prefer strconv over fmt](#prefer-strconv-over-fmt)
-    - [Avoid string-to-byte conversion](#avoid-string-to-byte-conversion)
+  - [성능(Performance)](#%ec%84%b1%eb%8a%a5performance)
+    - [`fmt` 보다 `strconv` 선호](#fmt-%eb%b3%b4%eb%8b%a4-strconv-%ec%84%a0%ed%98%b8)
+    - [string-to-byte 변환을 피해라](#string-to-byte-%eb%b3%80%ed%99%98%ec%9d%84-%ed%94%bc%ed%95%b4%eb%9d%bc)
   - [Style](#style)
     - [Group Similar Declarations](#group-similar-declarations)
     - [Import Group Ordering](#import-group-ordering)
@@ -916,13 +916,13 @@ func (f *foo) isRunning() bool {
 </td></tr>
 </tbody></table>
 
-## Performance
+## 성능(Performance)
 
-Performance-specific guidelines apply only to the hot path.
+성능-특정의(performance-specific)가이드라인은 hot path에만 적용된다.
 
-### Prefer strconv over fmt
+### `fmt` 보다 `strconv` 선호
 
-When converting primitives to/from strings, `strconv` is faster than
+프리미티브(primitives)를 문자열로 / 문자열에서 변환 할 때, `strconv`가 `fmt`보다 빠르다.
 `fmt`.
 
 <table>
@@ -960,10 +960,9 @@ BenchmarkStrconv-4    64.2 ns/op    1 allocs/op
 </td></tr>
 </tbody></table>
 
-### Avoid string-to-byte conversion
+### string-to-byte 변환을 피해라
 
-Do not create byte slices from a fixed string repeatedly. Instead, perform the
-conversion once and capture the result.
+고정 문자열(fixed string)에서 바이트 슬라이스(byte slices)를 반복해서 생성하지 마라. 대신 변환(conversion)을 한번 실행하고, 결과를 캡쳐해라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
