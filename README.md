@@ -340,7 +340,7 @@ trips[0] = ...
 </td>
 </tr>
 
-</tbody턴
+</tbody>
 </table>
 
 #### 슬라이스(Slices)와 맵(Maps)의 리턴
