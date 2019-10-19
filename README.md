@@ -1993,7 +1993,7 @@ for _, tt := range tests {
 
 ### 기능적 옵션 (Functional Options)
 
-기능적 옵션 (functional options)d은 일부 내부 구조체 (internal struct)에 정보를 기록하는 불투명한 `Option` 타입 (opaque option type)을 선언하는 패턴이다. 여러분들은 다양한 옵션 (variadic number of these options)을 받아들이고 내부 구조체의 옵션에 의해 기록된 모든 정보에 따라 행동하게 된다(act opon the full info. recorded by the options on the internal struct).
+기능적 옵션(functional options)은 일부 내부 구조체 (internal struct)에 정보를 기록하는 불투명한 `Option` 타입 (opaque option type)을 선언하는 패턴이다. 여러분들은 다양한 옵션 (variadic number of these options)을 받아들이고 내부 구조체의 옵션에 의해 기록된 모든 정보에 따라 행동하게 된다(act opon the full info. recorded by the options on the internal struct).
 
 확장 할 필요가 있는 생성자(constructors) 및 기타 공용 API (other public APIs)의 선택적 인수 (optional arguments), 특히나 해당하는 함수에 이미 3개 이상의 인수가 있는 경우에 이 패턴을 사용하기를 권장한다.
 
