@@ -2,7 +2,8 @@
 
 Translated in Korean  
 
-Currently WIP, but translation will done by 20th of Oct, 2019
+- First translation done with original doc on 17th of Oct, 2019 from [uber-go/guide](https://github.com/uber-go/guide)
+- Please feel free to fork and PR if you find any updates, issues or improvement.
 
 ---
 
@@ -339,7 +340,7 @@ trips[0] = ...
 </td>
 </tr>
 
-</tbody턴
+</tbody>
 </table>
 
 #### 슬라이스(Slices)와 맵(Maps)의 리턴
@@ -366,7 +367,7 @@ func (s *Stats) Snapshot() map[string]int {
 }
 
 // snapshot은 더이상 뮤텍스에 의해서 보호되지 않는다.
-// 따라서, snapshot에 대한 access가 안정되지 않는다. (any access to the snapshot is racy.)
+// 따라서, snapshot에 대한 접근은 레이스 컨디션을 야기할 수 있다. (any access to the snapshot is racy.)
 snapshot := stats.Snapshot()
 ```
 
