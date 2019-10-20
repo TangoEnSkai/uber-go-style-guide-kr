@@ -1,11 +1,11 @@
 # uber-go-style-guide-kr
 
-- Translated in Korean  
+- **Translated in Korean**  
 
   - First translation done with original doc on 17th of Oct, 2019 from [uber-go/guide](https://github.com/uber-go/guide)
   - Please feel free to fork and PR if you find any updates, issues or improvement.
 
-- 한국어 번역본
+- **한국어 번역본**
   - 초벌 번역은 [uber-go/guide](https://github.com/uber-go/guide)의 2019년 10월 17일 의 style.md 파일을 기반으로 완성되었음.
   - 기술 용어에 대한 과도한 한국어 번역은 지양하였으며, 특정 용어에 대한 한국어 번역을 했을 때에는 괄호로 원문의 단어를 살려두어 최대한 원문의 의도를 왜곡하지 않는 방향에서 번역 함.
 
@@ -111,9 +111,9 @@ row before the </tbody></table> line.
 
 ## 소개 (Introduction)
 
-스타일은 코드를 통제하는(govern) 관습이다. 이러한 관습(convention)은 소스파일 포맷팅 (e.g. gofmt)보다 더 많은 영역을 다루기(cover) 때문에, "스타일" 이라는 단어 자체가 약간 부적절 할 수 있다.
+스타일은 코드를 통제하는(govern) 관습이다. 이러한 관습(convention)은 소스파일 포맷팅 (e.g. gofmt)보다 더 많은 영역에 대응하기 (cover) 때문에, "스타일" 이라는 단어 자체가 약간 부적절 할 수도 있다.
 
-본 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것 (Dos and Don'ts)에 대하여 자세하게 설명하여 이러한 복잡성을 관리하는 것이다. 이런 규칙들은 엔지니어들이 Go 언어의 특성을(feature) 생산적으로개계속 사용할 수 있도록 코드 베이스를 관리가능하게 유지하기위해 존재한다.
+본 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것 (Dos and Don'ts)에 대하여 자세하게 설명하여 프로그래밍 컨벤션의 복잡성을 관리하는 것이다. 이런 규칙들은 엔지니어들이 Go 언어의 특성을(feature) 생산적으로개계속 사용할 수 있도록 코드 베이스를 관리가능하게 유지하기위해 존재한다.
 
 이 가이드는 원래 [Prashant Varanasi]와 [Simon Newton]이 동료들에게 Go를 사용하면서 개발속도 향상을 도모하기 위해 소개되었다. 또한, 수 년에 거쳐서 다른 사람들로부터의 피드백을 통해서 개정되 오고 있다.
 
@@ -139,12 +139,12 @@ row before the </tbody></table> line.
 
 일반적으로 인터페이스에 대한 포인터는 거의 필요하지 않을 것이다. 여러분들은 인터페이스를 값(value)으로서 전달(passing)해야 할 것이며, 인터페이스에 대한 기본 데이터(underlying data)는 여전히 포인터가 될 수 있다.
 
-한 인터페이스는 두 가지 필드이다:
+하나의 인터페이스는 두 가지 필드이다:
 
 1. 타입-특정 정보(type-specific information)에 대한 포인터. 여러분들을 이것을 "타입"으로 간주할 수 있다.
 2. 데이터 포인터. 저장된 데이터가 포인터일 경우, 이것은 직접적으로 저장될 수 있다. 만약, 저장된 데이터가 값(value)인 경우, 값에 대한 포인터가 저장된다.
 
-만약 여러분들이 기본 데이터(underlying data) 수정하기 위한 인터페이스 메서드 (interface methods)를 원한다면, 여러분들은 반드시 포인터를 사용해야 한다.
+만약 여러분들이 기본 데이터(underlying data) 수정하기 위한 인터페이스 메서드 (interface methods)를 원한다면, 반드시 포인터를 사용해야 한다.
 
 ### 수신자(Receivers)와 인터페이스(Interfaces)
 
@@ -180,7 +180,7 @@ sPtrs[1].Read()
 sPtrs[1].Write("test")
 ```
 
-마찬가지로, 메서드가 값 수신자(value receiver)를 가지고 있다고 하더라도 포인터가 인터페이스를 충족시킬 수 있다. 
+마찬가지로, 메서드가 값 수신자(value receiver)를 가지고 있다고 하더라도 포인터가 인터페이스를 충족시킬 수 있다.
 
 ```go
 type F interface {
@@ -301,7 +301,7 @@ func (m *SMap) Get(k string) string {
 
 ### 슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)
 
-슬라이스(Slices)와 맵(maps)은 기본 데이터(underlying data)에 대한 포인터를 포함하고 있으므로 이들을 복사 해야 할 때의 시나리오에 대해서 주의할 필요가 있다.  
+슬라이스(Slices)와 맵(maps)은 기본 데이터(underlying data)에 대한 포인터를 포함하고 있으므로 이들을 복사 해야 할 때의 상황(scenarios)에 대해서 주의할 필요가 있다.  
 
 #### Slices와 Maps의 수신(receiving)
 
@@ -371,7 +371,7 @@ func (s *Stats) Snapshot() map[string]int {
 }
 
 // snapshot은 더이상 뮤텍스에 의해서 보호되지 않는다.
-// 따라서, snapshot에 대한 접근은 레이스 컨디션을 야기할 수 있다. (any access to the snapshot is racy.)
+// 따라서, snapshot에 대한 접근은 레이스 컨디션을 야기할 수 있다.
 snapshot := stats.Snapshot()
 ```
 
@@ -449,7 +449,7 @@ return p.count
 
 ### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)
 
-채널의 크기는 일반적으로 1이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사(scrutiny)를 받아야 한다. 어떻게 크기를 결정(determined)할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
+채널의 크기는 일반적으로 1 이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사(scrutiny)를 받아야 한다. 어떻게 크기를 결정(determined)할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -692,9 +692,9 @@ if err := foo.Open("foo"); err != nil {
 
 호출이 실패할 경우 에러를 전파(propagating)하기 위한 3가지 주요 옵션이 있다:
 
-- 추가적인 컨텍스트(additional context)가 없고 원래의 에러 타입을 유지하려는 경우 본래의 에러(original error)를 반환하라.
-- 에러 메시지가 더 많은 컨텍스트를 제공하면서 [`"pkg/errors".Cause`]가 원래 오류를 추출하는데 사용될 수 있도록 [`"pkg/errors".Wrap`]을 사용하여 컨텍스트를 추가하라.
-- 호출자(callers)가 특정한 에러 케이스를(specific error case)를 감지하거나 다룰(handle) 필요가 없는 경우 [`fmt.Errorf`]를 사용하라.
+- 추가적인 컨텍스트(additional context)가 없고 원래의 에러 타입을 유지하려는 경우 본래의 에러(original error)를 반환.
+- 에러 메시지가 더 많은 컨텍스트를 제공하면서 [`"pkg/errors".Cause`]가 원래 오류를 추출하는데 사용될 수 있도록 [`"pkg/errors".Wrap`]을 사용하여 컨텍스트를 추가.
+- 호출자(callers)가 특정한 에러 케이스를(specific error case)를 감지하거나 다룰(handle) 필요가 없는 경우 [`fmt.Errorf`]를 사용.
 
 "connection refused"와 같은 모호한 오류보다, 컨첵스트를 추가하는 것을 추천한다. 따라서 여러분들은 "call service foo: connection refused."와 같이 더욱 유용한 에러를 얻을 수 있을 것이다.
 
@@ -747,7 +747,7 @@ x: y: new store: the error
 
 ### 타입의 어설션 실패 다루기 (Handle Type Assertion Failures)
 
-[type assertion]의 단일 반환 값 형식(the single return value form)은 잘못된 타입에 패닉 상태가 된다. 따라서 항상 "comma ok" 관용구(idiom)을 사용하는 것을 권장한다. 
+[type assertion]의 단일 반환 값 형식(the single return value form)은 잘못된 타입에 패닉 상태가 된다. 따라서 항상 "comma ok" 관용구(idiom)을 사용하는 것을 권장한다.
 
   [type assertion]: https://golang.org/ref/spec#Type_assertions
 
@@ -777,7 +777,7 @@ fine. -->
 
 ### 패닉을 피할 것 (Don't Panic)
 
-프로덕션 환경에서 실행되는 코드는 패닉을 반드시 피해야 한다. 패닉은 [cascading failures]의 주요 원인이다. 만약 에러가 발생할 경우, 함수는 에러를 리턴하고 호출자(caller)가 오류 처리 방법을 결정할 수 있도록 해야 한다. 
+프로덕션 환경에서 실행되는 코드는 패닉을 반드시 피해야 한다. 패닉은 [cascading failures]의 주요 원인이다. 만약 에러가 발생할 경우, 함수는 에러를 리턴하고 호출자(caller)가 오류 처리 방법을 결정할 수 있도록 해야 한다.
 
   [cascading failures]: https://en.wikipedia.org/wiki/Cascading_failure
 
@@ -1113,7 +1113,7 @@ const ENV_VAR = "MY_ENV"
 </td></tr>
 </tbody></table>
 
-그룹화를 사용하는 장소는 제한되어 있지 않다. 예를 들어, 함수 내에서 그룹화는 사용 가능 하다.
+그룹화를 사용하는 장소는 제한되어 있지 않다. 예를 들어, 함수 내에서도 그룹화를 사용할 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1154,7 +1154,7 @@ func f() string {
 - 표준 라이브러리 (Standard library)
 - 그 외 모든 것 (Everything else)
 
-이는 디폴트로 `goimports`에 의해서 적용되는 그룹들이다.
+이는 기본(default)으로 `goimports`에 의해서 적용되는 그룹들이다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1193,7 +1193,7 @@ import (
 - 대부분의 호출 지점(call sites)에서 named import를 사용하여 재명명(renamed)을 할 필요가 없다.
 - 짧고 간결하게. 이름(name)은 모든 호출 지점(call site)에서 식별됨을 상기하라.
 - 복수형(plural) 사용 금지. 예를 들어, `net/urls` 가 아닌 `net/url`.
-- "common", "util", "shared", 또는 "lib"의 용어 사용 금지. 정보가 없는 나쁜 이름들임.
+- "common", "util", "shared", 또는 "lib"의 용어 사용 금지. 정보가 없는 좋지 못한 이름임.
 
 또한 [Package Names] 와 [Style guideline for Go packages]를 참고하기 바란다.
 
@@ -1351,7 +1351,7 @@ for _, v := range data {
 
 ### 불필요한 else (Unnecessary Else)
 
-변수가 if의 두 가지 분기문에 의해서 설정될 경우, 이는 단일 `if`문 (simple if)으로 대체 될 수 있다.
+변수가 if의 두 가지 분기문에 의해서 설정될 경우, 이는 단일 `if`문 (simple if)으로 대체 할 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1381,7 +1381,7 @@ if b {
 
 ### 최상위 변수 선언 (Top-level Variable Declarations)
 
-최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식(expression)r과같은 같은 타입이 아닌 이상, 타입을 특정짓지 말라. 
+최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식(expression)r과같은 같은 타입이 아닌 이상, 타입을 특정짓지 말라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1426,7 +1426,7 @@ var _e error = F()
 
 예외: 수출되지 않는 에러 값 (Unexported error values)은 `err`의 접두사를 가져야 한다.
 
-이유: 최상위 변수 및 상수 (Top-level variables and constants)는 패키지 범위(package scope)를 가진다. 제네릭 이름(generic names)을 사용하는 것은 다른 파일에서 잘못된 값을 실수로 쉽게 사용할 수 있다.
+이유: 최상위 변수 및 상수 (Top-level variables and constants)는 패키지 범위(package scope)를 가진다. 제네릭 이름(generic names)을 사용 하는 것은 다른 파일에서 잘못된 값을 실수로 쉽게 사용 할 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1849,7 +1849,7 @@ sptr := &T{Name: "bar"}
 
 ### Printf외부의 문자열 형식 (Format Strings outside Printf)
 
-문자열 리터럴 외부의 `Printf`-스타일의 함수에 대한 형식 문자열(format strings)을 선언하는 경우 `const`값 (const value)로 만들라.
+문자열 리터럴 외부의 `Printf`-스타일의 함수에 대한 형식 문자열(format strings)을 선언하는 경우 `const`값 (const value)로 만들어라.
 
 이는 `go vet`이 형식 문자열의 정적 분석(static analysis) 수행하는데 도움이 된다.
 
@@ -2085,7 +2085,7 @@ db.Connect(
 </td></tr>
 </tbody></table>
 
-또한 다음을 참고하라,
+또한, 아래의 자료를 참고하기 바란다:
 
 - [Self-referential functions and the design of options]
 - [Functional options for friendly APIs]
