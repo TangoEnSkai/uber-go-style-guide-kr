@@ -923,7 +923,7 @@ func (f *foo) isRunning() bool {
 
 ## 성능(Performance)
 
-성능-특정의(performance-specific)가이드라인은 hot path에만 적용된다.
+성능-특정의(performance-specific)가이드라인은 성능에 민감한(hot path) 경우에만 적용된다.
 
 ### `fmt` 보다 `strconv` 선호
 
