@@ -1469,7 +1469,7 @@ const (
 
 ### 구조체에서의 임베딩 (Embedding in Structs)
 
-뮤텍스와 같은 임베드된 타입은 구조체의 필드 목록 가장 상위층에 있어야 하고, 임베드 된 필드를 일반 필드와 분리하는 empty ilie이 있어야 한다.
+뮤텍스와 같은 임베드된 타입은 구조체의 필드 목록 가장 상위층에 있어야 하고, 임베드 된 필드를 일반 필드와 분리하는 empty line이 있어야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
