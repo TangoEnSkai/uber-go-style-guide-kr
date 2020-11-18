@@ -1752,7 +1752,7 @@ return nil
 
 ### Naked 매개변수를 피해라 (Avoid Naked Parameters)
 
-함수 호출에서의 naked parameteres는 가독성을 떨어 뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하기 바란다.
+함수 호출에서의 naked parameters는 가독성을 떨어 뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하기 바란다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
