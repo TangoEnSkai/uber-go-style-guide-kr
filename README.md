@@ -1685,7 +1685,7 @@ func f(list []int) {
 
 ### 변수의 범위를 줄여라 (Reduce Scope of Variables)
 
-가능한 변수의 범위를 줄여라. 만약 [Reduce Nesting](#reduce-nesting)과의 출돌하는 경우 범위를 줄이면 안된다.
+가능한 변수의 범위를 줄여라. 만약 [Reduce Nesting](#reduce-nesting)과의 충돌하는 경우 범위를 줄이면 안된다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
