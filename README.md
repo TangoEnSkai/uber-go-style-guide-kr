@@ -96,7 +96,7 @@ row before the </tbody></table> line.
     - [최상위 변수 선언 (Top-level Variable Declarations)](#%ec%b5%9c%ec%83%81%ec%9c%84-%eb%b3%80%ec%88%98-%ec%84%a0%ec%96%b8-top-level-variable-declarations)
     - [수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)](#%ec%88%98%ec%b6%9c%eb%90%98%ec%a7%80-%ec%95%8a%ec%9d%80-%ec%a0%84%ec%97%ad%ec%97%90-%ec%9d%84-%eb%b6%99%ec%97%ac%eb%9d%bc-prefix-unexported-globals-with)
     - [구조체에서의 임베딩 (Embedding in Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4%ec%97%90%ec%84%9c%ec%9d%98-%ec%9e%84%eb%b2%a0%eb%94%a9-embedding-in-structs)
-    - [구조체 초기화를 위해 필드을 사용해라 (Use Field Names to initialize Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4-%ec%b4%88%ea%b8%b0%ed%99%94%eb%a5%bc-%ec%9c%84%ed%95%b4-%ed%95%84%eb%93%9c%ec%9d%84-%ec%82%ac%ec%9a%a9%ed%95%b4%eb%9d%bc-use-field-names-to-initialize-structs)
+    - [구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4-%ec%b4%88%ea%b8%b0%ed%99%94%eb%a5%bc-%ec%9c%84%ed%95%b4-%ed%95%84%eb%93%9c%eb%a5%bc-%ec%82%ac%ec%9a%a9%ed%95%b4%eb%9d%bc-use-field-names-to-initialize-structs)
     - [지역 변수 선언 (Local Variable Declarations)](#%ec%a7%80%ec%97%ad-%eb%b3%80%ec%88%98-%ec%84%a0%ec%96%b8-local-variable-declarations)
     - [nil은 유효한 슬라이스 (nil is a valid slice)](#nil%ec%9d%80-%ec%9c%a0%ed%9a%a8%ed%95%9c-%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-nil-is-a-valid-slice)
     - [변수의 범위를 줄여라 (Reduce Scope of Variables)](#%eb%b3%80%ec%88%98%ec%9d%98-%eb%b2%94%ec%9c%84%eb%a5%bc-%ec%a4%84%ec%97%ac%eb%9d%bc-reduce-scope-of-variables)
@@ -1496,7 +1496,7 @@ type Client struct {
 </td></tr>
 </tbody></table>
 
-### 구조체 초기화를 위해 필드을 사용해라 (Use Field Names to initialize Structs)
+### 구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)
 
 구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
 
