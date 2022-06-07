@@ -64,73 +64,76 @@ row before the </tbody></table> line.
 # Uber의 Go언어 스타일 가이드 (Uber's Go Style Guide)
 
 - [uber-go-style-guide-kr](#uber-go-style-guide-kr)
-- [Uber의 Go언어 스타일 가이드 (Uber's Go Style Guide)](#uber%ec%9d%98-go%ec%96%b8%ec%96%b4-%ec%8a%a4%ed%83%80%ec%9d%bc-%ea%b0%80%ec%9d%b4%eb%93%9c-ubers-go-style-guide)
-  - [소개 (Introduction)](#%ec%86%8c%ea%b0%9c-introduction)
-  - [가이드라인 (Guidelines)](#%ea%b0%80%ec%9d%b4%eb%93%9c%eb%9d%bc%ec%9d%b8-guidelines)
-    - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4%ec%97%90-%eb%8c%80%ed%95%9c-%ed%8f%ac%ec%9d%b8%ed%84%b0-pointers-to-interfaces)
-    - [수신자(Receivers)와 인터페이스(Interfaces)](#%ec%88%98%ec%8b%a0%ec%9e%90receivers%ec%99%80-%ec%9d%b8%ed%84%b0%ed%8e%98%ec%9d%b4%ec%8a%a4interfaces)
-    - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#%ec%a0%9c%eb%a1%9c-%ea%b0%92-%eb%ae%a4%ed%85%8d%ec%8a%a4zero-value-mutexes%eb%8a%94-%ec%9c%a0%ed%9a%a8%ed%95%98%eb%8b%a4)
-    - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-%eb%b3%b5%ec%82%accopy-slices%ec%99%80-%eb%b0%94%ec%9a%b4%eb%8d%94%eb%a6%ac-%ec%97%90%ec%84%9c%ec%9d%98-%eb%a7%b5maps-at-boundaries)
-      - [Slices와 Maps의 수신(receiving)](#slices%ec%99%80-maps%ec%9d%98-%ec%88%98%ec%8b%a0receiving)
-      - [슬라이스(Slices)와 맵(Maps)의 리턴](#%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4slices%ec%99%80-%eb%a7%b5maps%ec%9d%98-%eb%a6%ac%ed%84%b4)
-    - [Defer에서 Clean Up까지](#defer%ec%97%90%ec%84%9c-clean-up%ea%b9%8c%ec%a7%80)
-    - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#%ec%b1%84%eb%84%90%ec%9d%98-%ed%81%ac%ea%b8%b0channel-size%eb%8a%94-%ed%95%98%eb%82%98one-%ed%98%b9%ec%9d%80-%ec%a0%9c%eb%a1%9cnone)
-    - [Enums은 1에서부터 시작하라](#enums%ec%9d%80-1%ec%97%90%ec%84%9c%eb%b6%80%ed%84%b0-%ec%8b%9c%ec%9e%91%ed%95%98%eb%9d%bc)
-    - [에러 형(Error Types)](#%ec%97%90%eb%9f%ac-%ed%98%95error-types)
-    - [오류 래핑(Error Wrapping)](#%ec%98%a4%eb%a5%98-%eb%9e%98%ed%95%91error-wrapping)
-    - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#%ed%83%80%ec%9e%85%ec%9d%98-%ec%96%b4%ec%84%a4%ec%85%98-%ec%8b%a4%ed%8c%a8-%eb%8b%a4%eb%a3%a8%ea%b8%b0-handle-type-assertion-failures)
-    - [패닉을 피할 것 (Don't Panic)](#%ed%8c%a8%eb%8b%89%ec%9d%84-%ed%94%bc%ed%95%a0-%ea%b2%83-dont-panic)
-    - [go.uber.org/atomic의 사용](#gouberorgatomic%ec%9d%98-%ec%82%ac%ec%9a%a9)
-  - [성능(Performance)](#%ec%84%b1%eb%8a%a5performance)
-    - [`fmt` 보다 `strconv` 선호](#fmt-%eb%b3%b4%eb%8b%a4-strconv-%ec%84%a0%ed%98%b8)
-    - [string-to-byte 변환을 피해라](#string-to-byte-%eb%b3%80%ed%99%98%ec%9d%84-%ed%94%bc%ed%95%b4%eb%9d%bc)
-  - [스타일 (Style)](#%ec%8a%a4%ed%83%80%ec%9d%bc-style)
-    - [그룹 유사 선언 (Group Similar Declarations)](#%ea%b7%b8%eb%a3%b9-%ec%9c%a0%ec%82%ac-%ec%84%a0%ec%96%b8-group-similar-declarations)
-    - [Import 그룹 정리/배치 (Import Group Ordering)](#import-%ea%b7%b8%eb%a3%b9-%ec%a0%95%eb%a6%ac%eb%b0%b0%ec%b9%98-import-group-ordering)
-    - [패키지 이름 (Package Names)](#%ed%8c%a8%ed%82%a4%ec%a7%80-%ec%9d%b4%eb%a6%84-package-names)
-    - [함수 이름 (Function Names)](#%ed%95%a8%ec%88%98-%ec%9d%b4%eb%a6%84-function-names)
-    - [Import 별칭 (Import Aliasing)](#import-%eb%b3%84%ec%b9%ad-import-aliasing)
-    - [함수 그룹화와 정렬/배치 (Function Grouping and Ordering)](#%ed%95%a8%ec%88%98-%ea%b7%b8%eb%a3%b9%ed%99%94%ec%99%80-%ec%a0%95%eb%a0%ac%eb%b0%b0%ec%b9%98-function-grouping-and-ordering)
-    - [중첩 감소 (Reduce Nesting)](#%ec%a4%91%ec%b2%a9-%ea%b0%90%ec%86%8c-reduce-nesting)
-    - [불필요한 else (Unnecessary Else)](#%eb%b6%88%ed%95%84%ec%9a%94%ed%95%9c-else-unnecessary-else)
-    - [최상위 변수 선언 (Top-level Variable Declarations)](#%ec%b5%9c%ec%83%81%ec%9c%84-%eb%b3%80%ec%88%98-%ec%84%a0%ec%96%b8-top-level-variable-declarations)
-    - [수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)](#%ec%88%98%ec%b6%9c%eb%90%98%ec%a7%80-%ec%95%8a%ec%9d%80-%ec%a0%84%ec%97%ad%ec%97%90-%ec%9d%84-%eb%b6%99%ec%97%ac%eb%9d%bc-prefix-unexported-globals-with)
-    - [구조체에서의 임베딩 (Embedding in Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4%ec%97%90%ec%84%9c%ec%9d%98-%ec%9e%84%eb%b2%a0%eb%94%a9-embedding-in-structs)
-    - [구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4-%ec%b4%88%ea%b8%b0%ed%99%94%eb%a5%bc-%ec%9c%84%ed%95%b4-%ed%95%84%eb%93%9c%eb%a5%bc-%ec%82%ac%ec%9a%a9%ed%95%b4%eb%9d%bc-use-field-names-to-initialize-structs)
-    - [지역 변수 선언 (Local Variable Declarations)](#%ec%a7%80%ec%97%ad-%eb%b3%80%ec%88%98-%ec%84%a0%ec%96%b8-local-variable-declarations)
-    - [nil은 유효한 슬라이스 (nil is a valid slice)](#nil%ec%9d%80-%ec%9c%a0%ed%9a%a8%ed%95%9c-%ec%8a%ac%eb%9d%bc%ec%9d%b4%ec%8a%a4-nil-is-a-valid-slice)
-    - [변수의 범위를 줄여라 (Reduce Scope of Variables)](#%eb%b3%80%ec%88%98%ec%9d%98-%eb%b2%94%ec%9c%84%eb%a5%bc-%ec%a4%84%ec%97%ac%eb%9d%bc-reduce-scope-of-variables)
-    - [Naked 매개변수를 피해라 (Avoid Naked Parameters)](#naked-%eb%a7%a4%ea%b0%9c%eb%b3%80%ec%88%98%eb%a5%bc-%ed%94%bc%ed%95%b4%eb%9d%bc-avoid-naked-parameters)
-    - [이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)](#%ec%9d%b4%ec%8a%a4%ec%bc%80%ec%9d%b4%ed%95%91%ec%9d%84-%ed%94%bc%ed%95%98%ea%b8%b0-%ec%9c%84%ed%95%b4-%ec%9b%90%ec%8b%9c-%eb%ac%b8%ec%9e%90-%eb%a6%ac%ed%84%b0%eb%9f%b4-%ec%82%ac%ec%9a%a9-use-raw-string-literals-to-avoid-escaping)
-    - [구조체 참조 초기화 (Initializing Struct References)](#%ea%b5%ac%ec%a1%b0%ec%b2%b4-%ec%b0%b8%ec%a1%b0-%ec%b4%88%ea%b8%b0%ed%99%94-initializing-struct-references)
-    - [Printf외부의 문자열 형식 (Format Strings outside Printf)](#printf%ec%99%b8%eb%b6%80%ec%9d%98-%eb%ac%b8%ec%9e%90%ec%97%b4-%ed%98%95%ec%8b%9d-format-strings-outside-printf)
-    - [Printf-스타일 함수의 이름 (Naming Printf-style Functions)](#printf-%ec%8a%a4%ed%83%80%ec%9d%bc-%ed%95%a8%ec%88%98%ec%9d%98-%ec%9d%b4%eb%a6%84-naming-printf-style-functions)
-  - [패턴 (Patterns)](#%ed%8c%a8%ed%84%b4-patterns)
-    - [테스트 테이블 (Test Tables)](#%ed%85%8c%ec%8a%a4%ed%8a%b8-%ed%85%8c%ec%9d%b4%eb%b8%94-test-tables)
-    - [기능적 옵션 (Functional Options)](#%ea%b8%b0%eb%8a%a5%ec%a0%81-%ec%98%b5%ec%85%98-functional-options)
+- [Uber의 Go언어 스타일 가이드 (Uber's Go Style Guide)](#uber의-go언어-스타일-가이드-ubers-go-style-guide)
+  - [소개 (Introduction)](#소개-introduction)
+  - [가이드라인 (Guidelines)](#가이드라인-guidelines)
+    - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#인터페이스에-대한-포인터-pointers-to-interfaces)
+    - [수신자(Receivers)와 인터페이스(Interfaces)](#수신자receivers와-인터페이스interfaces)
+    - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#제로-값-뮤텍스zero-value-mutexes는-유효하다)
+    - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#슬라이스-복사copy-slices와-바운더리-에서의-맵maps-at-boundaries)
+      - [Slices와 Maps의 수신(receiving)](#slices와-maps의-수신receiving)
+      - [슬라이스(Slices)와 맵(Maps)의 리턴](#슬라이스slices와-맵maps의-리턴)
+    - [Defer에서 Clean Up까지](#defer에서-clean-up까지)
+    - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#채널의-크기channel-size는-하나one-혹은-제로none)
+    - [Enums은 1에서부터 시작하라](#enums은-1에서부터-시작하라)
+    - [에러 형(Error Types)](#에러-형error-types)
+    - [오류 래핑(Error Wrapping)](#오류-래핑error-wrapping)
+    - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#타입의-어설션-실패-다루기-handle-type-assertion-failures)
+    - [패닉을 피할 것 (Don't Panic)](#패닉을-피할-것-dont-panic)
+    - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
+  - [성능(Performance)](#성능performance)
+    - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
+    - [string-to-byte 변환을 피해라](#string-to-byte-변환을-피해라)
+  - [스타일 (Style)](#스타일-style)
+    - [그룹 유사 선언 (Group Similar Declarations)](#그룹-유사-선언-group-similar-declarations)
+    - [Import 그룹 정리/배치 (Import Group Ordering)](#import-그룹-정리배치-import-group-ordering)
+    - [패키지 이름 (Package Names)](#패키지-이름-package-names)
+    - [함수 이름 (Function Names)](#함수-이름-function-names)
+    - [Import 별칭 (Import Aliasing)](#import-별칭-import-aliasing)
+    - [함수 그룹화와 정렬/배치 (Function Grouping and Ordering)](#함수-그룹화와-정렬배치-function-grouping-and-ordering)
+    - [중첩 감소 (Reduce Nesting)](#중첩-감소-reduce-nesting)
+    - [불필요한 else (Unnecessary Else)](#불필요한-else-unnecessary-else)
+    - [최상위 변수 선언 (Top-level Variable Declarations)](#최상위-변수-선언-top-level-variable-declarations)
+    - [수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)](#수출되지-않은-전역에-_을-붙여라-prefix-unexported-globals-with-_)
+    - [구조체에서의 임베딩 (Embedding in Structs)](#구조체에서의-임베딩-embedding-in-structs)
+    - [구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)](#구조체-초기화를-위해-필드를-사용해라-use-field-names-to-initialize-structs)
+    - [지역 변수 선언 (Local Variable Declarations)](#지역-변수-선언-local-variable-declarations)
+    - [nil은 유효한 슬라이스 (nil is a valid slice)](#nil은-유효한-슬라이스-nil-is-a-valid-slice)
+    - [변수의 범위를 줄여라 (Reduce Scope of Variables)](#변수의-범위를-줄여라-reduce-scope-of-variables)
+    - [Naked 매개변수를 피해라 (Avoid Naked Parameters)](#naked-매개변수를-피해라-avoid-naked-parameters)
+    - [이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)](#이스케이핑을-피하기-위해-원시-문자-리터럴-사용-use-raw-string-literals-to-avoid-escaping)
+    - [구조체 참조 초기화 (Initializing Struct References)](#구조체-참조-초기화-initializing-struct-references)
+    - [Printf외부의 문자열 형식 (Format Strings outside Printf)](#printf외부의-문자열-형식-format-strings-outside-printf)
+    - [Printf-스타일 함수의 이름 (Naming Printf-style Functions)](#printf-스타일-함수의-이름-naming-printf-style-functions)
+  - [패턴 (Patterns)](#패턴-patterns)
+    - [테스트 테이블 (Test Tables)](#테스트-테이블-test-tables)
+    - [기능적 옵션 (Functional Options)](#기능적-옵션-functional-options)
 
 ## 소개 (Introduction)
 
-스타일은 코드를 통제하는(govern) 관습이다. 이러한 관습(convention)은 소스파일 포맷팅 (e.g. gofmt)보다 더 많은 영역에 대응하기 (cover) 때문에, "스타일" 이라는 단어 자체가 약간 부적절 할 수도 있다.
+스타일(styles)은 코드를 관리(govern)하는 컨벤션/규칙(conventions)이다. 컨벤션은 잘 못 이해 될 수 있는데 왜냐하면 단순히 `gofmt`가 수행하는 소스 코드 포맷팅 이외의 의미도 포함하기 때문이다.
 
-본 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것 (Dos and Don'ts)에 대하여 자세하게 설명하여 프로그래밍 컨벤션의 복잡성을 관리하는 것이다. 이런 규칙들은 엔지니어들이 Go 언어의 특성을(feature) 생산적으로 계속 사용할 수 있도록 코드 베이스를 관리가능하게 유지하기위해 존재한다.
+이 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것을 자세히 설명하여, 컨벤션의 복잡성을 관리하는 것이다.
+이 컨벤션은 엔지니어가 Go언어을 생산적으로 사용할 수 있도록 하면서 코드를 관리 가능하게 유지하기 위해 존재한다.
 
-이 가이드는 원래 [Prashant Varanasi]와 [Simon Newton]이 동료들에게 Go를 사용하면서 개발속도 향상을 도모하기 위해 소개되었다. 또한, 수 년에 거쳐서 다른 사람들로부터의 피드백을 통해서 개정되 오고 있다.
+이는 원래 [Prashant Varanasi]와 [Simon Newton]이 일부 동료들에게 Go를 사용하면서 개발속도 향상을 도모하기 위해 소개되었다. 수 년에 걸쳐 피드백을 통해 개선하고 있다.
 
   [Prashant Varanasi]: https://github.com/prashantv
   [Simon Newton]: https://github.com/nomis52 
 
-이 문서는 Uber에서의 엔지니어들이 지향하는 Go언어 코드의 관용적 규칙을 설명한다. 상당 수의 규칙들은 Go언어에 대한 일반적인 가이드라인이며, 다른 부분에 대해서는 외부 레퍼런스에 의해 확장된다 (아래 참고)
+이 문서는 Uber에서 따르는 Go 코드 컨벤션을 정리한다. 이들 중 많은 부분이 Go에 대한 일반적 지침이고, 나머지는 외부 리소스에 따라 확장한다:
 
 1. [Effective Go](https://golang.org/doc/effective_go.html)
-2. [The Go common mistakes guide](https://github.com/golang/go/wiki/CodeReviewComments)
+2. [Go Common Mistakes](https://github.com/golang/go/wiki/CommonMistakes)
+3. [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 
-모든 코드는 `golint` 와 `go vet`를 실행할 때 에러가 없어야 한다. 또한 우리는 여러분들의 에디터를 아래와 같이 설정하기를 권고한다:
+모든 코드는 `golint` 및 `go vet`를 실행할 때 오류가 없어야 한다.
+코드 에디터를 다음와 같이 설정하기를 권장한다:
 
-- Run `goimports` on save
-- Run `golint` and `go vet` to check for errors
+- 코드 저장시 `goimports` 실행
+- `golint` 및 `go vet`를 실행하여 오류 확인
 
-아래의 링크를 통해서 Go 툴을 지원하는 에디터에 대한 정보를 얻을 수 있다:
+여기에서 Go 도구에 대한 편집기 지원 정보를 찾을 수 있다:
 <https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins>
 
 ## 가이드라인 (Guidelines)
