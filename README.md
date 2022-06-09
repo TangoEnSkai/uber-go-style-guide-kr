@@ -68,6 +68,7 @@ row before the </tbody></table> line.
   - [소개 (Introduction)](#소개-introduction)
   - [가이드라인 (Guidelines)](#가이드라인-guidelines)
     - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#인터페이스에-대한-포인터-pointers-to-interfaces)
+    - [인터페이스 컴플라이언스 검증](#인터페이스-컴플라이언스-검증)
     - [수신자(Receivers)와 인터페이스(Interfaces)](#수신자receivers와-인터페이스interfaces)
     - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#제로-값-뮤텍스zero-value-mutexes는-유효하다)
     - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#슬라이스-복사copy-slices와-바운더리-에서의-맵maps-at-boundaries)
@@ -151,6 +152,73 @@ row before the </tbody></table> line.
 2. 데이터 포인터. 저장된 데이터가 포인터일 경우 직접 저장된다. 저장된 데이터가 값이면 값에 대한 포인터가 저장된다.
 
 인터페이스 메서드가 기본 데이터(underlying data)를 수정하도록 하려면 반드시 포인터를 사용해야 한다.
+
+### 인터페이스 컴플라이언스 검증
+
+적절한 경우, 컴파일 시간에 인터페이스 컴플라이언스를 검증한다. 이는 다음을 포함한다:
+- API contract의 일부로 특정 인터페이스를 구현하는데 필요한 exported 타입
+- 동일한 인터페이스를 구현하는 타입의 컬렉션의 일부인 exported 또는 unexported 타입 
+- 기타 인터페이스 위반으로 인해 사용자가 중단되는 경우
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type Handler struct {
+  // ...
+}
+
+
+
+func (h *Handler) ServeHTTP(
+  w http.ResponseWriter,
+  r *http.Request,
+) {
+  ...
+}
+```
+
+</td><td>
+
+```go
+type Handler struct {
+  // ...
+}
+
+var _ http.Handler = (*Handler)(nil)
+
+func (h *Handler) ServeHTTP(
+  w http.ResponseWriter,
+  r *http.Request,
+) {
+  // ...
+}
+```
+
+</td></tr>
+</tbody></table>
+
+`var _ http.Handler = (*Handler)(nil)`구문은 `*Handler`가 `http.Handler` 인터페이스와 일치하지 않는 경우 컴파일에 실패한다.
+
+할당문의 우변 (the right hand side of the assignment)은 어설션된 타입의 제로 값(zero value)이어야 한다. 이것은 포인터 타입(`*Handler`와 같은), slice 및 map의 경우 `nil`이고 struct 타입의 경우 빈 구조체다. 
+
+```go
+type LogHandler struct {
+  h   http.Handler
+  log *zap.Logger
+}
+
+var _ http.Handler = LogHandler{}
+
+func (h LogHandler) ServeHTTP(
+  w http.ResponseWriter,
+  r *http.Request,
+) {
+  // ...
+}
+```
 
 ### 수신자(Receivers)와 인터페이스(Interfaces)
 
