@@ -69,7 +69,7 @@ row before the </tbody></table> line.
   - [가이드라인 (Guidelines)](#가이드라인-guidelines)
     - [인터페이스에 대한 포인터 (Pointers to Interfaces)](#인터페이스에-대한-포인터-pointers-to-interfaces)
     - [인터페이스 컴플라이언스 검증](#인터페이스-컴플라이언스-검증)
-    - [수신자(Receivers)와 인터페이스(Interfaces)](#수신자receivers와-인터페이스interfaces)
+    - [리시버(Receivers)와 인터페이스(Interfaces)](#리시버receivers와-인터페이스interfaces)
     - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#제로-값-뮤텍스zero-value-mutexes는-유효하다)
     - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#슬라이스-복사copy-slices와-바운더리-에서의-맵maps-at-boundaries)
       - [Slices와 Maps의 수신(receiving)](#slices와-maps의-수신receiving)
@@ -220,9 +220,10 @@ func (h LogHandler) ServeHTTP(
 }
 ```
 
-### 수신자(Receivers)와 인터페이스(Interfaces)
+### 리시버(Receivers)와 인터페이스(Interfaces)
 
-값 수신자 (value receivers)와 메서드(Methods)는 포인터 혹은 값에 의해서 호출 될 수 있다.
+값 리시버가 있는 메서드는 값 뿐만 아니라 포인터에서도 호출할 수 있습니다.
+포인터 리시버 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://golang.org/ref/spec#Method_values))에서만 호출할 수 있습니다.
 
 예를 들면,
 
@@ -241,20 +242,20 @@ func (s *S) Write(str string) {
 
 sVals := map[int]S{1: {"A"}}
 
-// 오직 값만 사용하여 Read를 호출 할 수 있다.
+// You can only call Read using a value
 sVals[1].Read()
 
-// 아래 코드는 컴파일 되지 않을 것:
+// This will not compile:
 //  sVals[1].Write("test")
 
 sPtrs := map[int]*S{1: {"A"}}
 
-// 포인터를 사용하여 Read와 Write 모두 호출 할 수 있다.
+// You can call both Read and Write using a pointer
 sPtrs[1].Read()
 sPtrs[1].Write("test")
 ```
 
-마찬가지로, 메서드가 값 수신자(value receiver)를 가지고 있다고 하더라도 포인터가 인터페이스를 충족시킬 수 있다.
+마찬가지로 메서드에 값 리시버가 있더라도 인터페이스는 포인터로 충족될 수 있습니다.
 
 ```go
 type F interface {
@@ -279,7 +280,7 @@ i = s1Val
 i = s1Ptr
 i = s2Ptr
 
-// s2Val이 값이고 f에 대한 수신자가 없기 때문에, 아래의 코드는 컴파일 되지 않는다.
+// The following doesn't compile, since s2Val is a value, and there is no value receiver for f.
 //   i = s2Val
 ```
 
@@ -1332,10 +1333,10 @@ import (
 
 그러므로, 수출되는 함수 (exported function)는 파일 내의 `struct`, `const`, `var`의 정의 구문 이후의 시작 부분에 나타나야 한다.
 
-`newXYZ()`/`NewXYZ()`가 타입이 정의된 뒷부분에 나타날 수 있지만, 이는 나머지 수신자(receiver)의 메서드들 전에 나타나야 한다 (may appear after the type is defined, but before the
+`newXYZ()`/`NewXYZ()`가 타입이 정의된 뒷부분에 나타날 수 있지만, 이는 나머지 리시버(receiver)의 메서드들 전에 나타나야 한다 (may appear after the type is defined, but before the
 rest of the methods on the receiver.)
 
-함수들은 수신자에 의해 그룹화 되므로, 일반 유틸리티 함수들(plain utility functions)는 파일의 뒷부분에 나타나야 한다.
+함수들은 리시버에 의해 그룹화 되므로, 일반 유틸리티 함수들(plain utility functions)는 파일의 뒷부분에 나타나야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
