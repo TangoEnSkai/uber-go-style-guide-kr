@@ -74,7 +74,7 @@ row before the </tbody></table> line.
     - [바운더리에서 슬라이스 및 맵 복사](#바운더리에서-슬라이스-및-맵-복사)
       - [슬라이스와 맵 수신](#슬라이스와-맵-수신)
       - [슬라이스와 맵 반환](#슬라이스와-맵-반환)
-    - [Defer에서 Clean Up까지](#defer에서-clean-up까지)
+    - [Clean Up 하기 위한 Defer](#clean-up-하기-위한-defer)
     - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#채널의-크기channel-size는-하나one-혹은-제로none)
     - [Enums은 1에서부터 시작하라](#enums은-1에서부터-시작하라)
     - [에러 형(Error Types)](#에러-형error-types)
@@ -475,9 +475,9 @@ snapshot := stats.Snapshot()
 </td></tr>
 </tbody></table>
 
-### Defer에서 Clean Up까지
+### Clean Up 하기 위한 Defer
 
-`defer`를 사용해여 파일(files)과 잠금(locks)과 같은 리소스를 정리하라.
+defer를 사용하여 파일(files) 및 잠금(locks)과 같은 리소스를 정리한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -497,7 +497,7 @@ p.Unlock()
 
 return newCount
 
-// 여러개의 return으로 인해서 Unlock호출을 놓치기 쉬움
+// easy to miss unlocks due to multiple returns
 ```
 
 </td><td>
@@ -513,13 +513,15 @@ if p.count < 10 {
 p.count++
 return p.count
 
-// 더 나은 가독성 
+// more readable
 ```
 
 </td></tr>
 </tbody></table>
 
-`defer`는 오버헤드가 상당히 작으며 함수 실행 시간이 나노초 단위임을 증명할 수 있을 경우가 아닌 이상 피하지 않고 사용해야 한다. `defer`의 사용으로 인한 가독성의 이점으로 인하여 지연을 사용하는 비용은 적다. 간단한 메모리 접근(simple memory accesses)이상을 가지는 거대한 메서드가 있는 경우, 다른 계산이 `defer`보다 더 중요하다.
+`defer`는 오버헤드가 극히 작으며 함수 실행 시간이 대략 nanoseconds(ns) 수준임을 증명할 수 있는 경우에만 사용을 피해야 한다.
+`defer` 사용으로 인한 가독성 향상은 사용에 따른 소액의 비용을 지불 할 가치가 있다.
+이는 다른 계산이 `defer`보다 더 중요한, 단순한 메모리 액세스 이상의 대규모 메서드에 특히 해당한다.
 
 ### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)
 
