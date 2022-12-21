@@ -71,9 +71,9 @@ row before the </tbody></table> line.
     - [인터페이스 컴플라이언스 검증](#인터페이스-컴플라이언스-검증)
     - [리시버(Receivers)와 인터페이스(Interfaces)](#리시버receivers와-인터페이스interfaces)
     - [제로 값 뮤텍스(Zero-value Mutexes)는 유효하다](#제로-값-뮤텍스zero-value-mutexes는-유효하다)
-    - [슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)](#슬라이스-복사copy-slices와-바운더리-에서의-맵maps-at-boundaries)
-      - [Slices와 Maps의 수신(receiving)](#slices와-maps의-수신receiving)
-      - [슬라이스(Slices)와 맵(Maps)의 리턴](#슬라이스slices와-맵maps의-리턴)
+    - [바운더리에서 슬라이스 및 맵 복사](#바운더리에서-슬라이스-및-맵-복사)
+      - [슬라이스와 맵 수신](#슬라이스와-맵-수신)
+      - [슬라이스와 맵 반환](#슬라이스와-맵-반환)
     - [Defer에서 Clean Up까지](#defer에서-clean-up까지)
     - [채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)](#채널의-크기channel-size는-하나one-혹은-제로none)
     - [Enums은 1에서부터 시작하라](#enums은-1에서부터-시작하라)
@@ -373,13 +373,13 @@ func (m *SMap) Get(k string) string {
 
 </tbody></table>
 
-### 슬라이스 복사(Copy Slices)와 바운더리 에서의 맵(Maps at Boundaries)
+### 바운더리에서 슬라이스 및 맵 복사
 
-슬라이스(Slices)와 맵(maps)은 기본 데이터(underlying data)에 대한 포인터를 포함하고 있으므로 이들을 복사 해야 할 때의 상황(scenarios)에 대해서 주의할 필요가 있다.  
+슬라이스 및 맵에는 기본 데이터에 대한 포인터가 포함되어 있으므로 복사해야 하는 시나리오에 주의 할 필요가 있다.
 
-#### Slices와 Maps의 수신(receiving)
+#### 슬라이스와 맵 수신
 
-참조/레퍼런스(reference)를 저장할 경우, 사용자는 인수(argument)로 받는 맵 혹은 슬라이스를 수정할 수 있음을 명심하라.
+참조/레퍼런스(reference)를 저장하면 인수(argument)로 받은 맵이나 슬라이스를 사용자가 수정할 수 있음을 명심하자.
 
 <table>
 <thead><tr><th>Bad</th> <th>Good</th></tr></thead>
@@ -395,7 +395,7 @@ func (d *Driver) SetTrips(trips []Trip) {
 trips := ...
 d1.SetTrips(trips)
 
-// d1.trips을 수정할 것을 의미하는가?
+// Did you mean to modify d1.trips?
 trips[0] = ...
 ```
 
@@ -411,7 +411,7 @@ func (d *Driver) SetTrips(trips []Trip) {
 trips := ...
 d1.SetTrips(trips)
 
-// 이제 d1.trips에 영향을 주지 않고서 trips[0]을 수정 할 수 있다.
+// We can now modify trips[0] without affecting d1.trips.
 trips[0] = ...
 ```
 
@@ -421,9 +421,9 @@ trips[0] = ...
 </tbody>
 </table>
 
-#### 슬라이스(Slices)와 맵(Maps)의 리턴
+#### 슬라이스와 맵 반환
 
-마찬가지로, 내부 상태(internal status)를 노출시키는 슬라이스나 맵에 대한 사용자의 수정에 주의하라.
+마찬가지로 내부 상태(internal state)를 노출하는 맵 또는 슬라이스에 대한 사용자 수정에 주의하자.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -436,7 +436,7 @@ type Stats struct {
   counters map[string]int
 }
 
-// Snapshot은 현재의 stats을 반환(return)한다
+// Snapshot returns the current stats.
 func (s *Stats) Snapshot() map[string]int {
   s.mu.Lock()
   defer s.mu.Unlock()
@@ -444,8 +444,8 @@ func (s *Stats) Snapshot() map[string]int {
   return s.counters
 }
 
-// snapshot은 더이상 뮤텍스에 의해서 보호되지 않는다.
-// 따라서, snapshot에 대한 접근은 레이스 컨디션을 야기할 수 있다.
+// snapshot is no longer protected by the mutex, so any
+// access to the snapshot is subject to data races.
 snapshot := stats.Snapshot()
 ```
 
@@ -468,7 +468,7 @@ func (s *Stats) Snapshot() map[string]int {
   return result
 }
 
-// Snapshot는 카피(copy)다.
+// Snapshot is now a copy.
 snapshot := stats.Snapshot()
 ```
 
