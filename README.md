@@ -89,7 +89,7 @@ row before the </tbody></table> line.
     - [변경 가능한 전역변수 피하기](#변경-가능한-전역변수-피하기)
     - [공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기)
     - [내장된(built-in) 이름 사용을 피해라](#내장된built-in-이름-사용을-피해라)
-    - [Avoid `init()`](#avoid-init)
+    - [`init()` 사용을 피해라](#init-사용을-피해라)
   - [성능(Performance)](#성능performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
     - [string-to-byte 변환을 피해라](#string-to-byte-변환을-피해라)
@@ -1455,26 +1455,22 @@ func (f Foo) String() string {
 
 컴파일는 미리 선언된 식별자(predeclared identifier)들을 사용 할 때 오류를 생성하지 않지만, `go vet`과 같은 도구는 이와 같은 섀도잉(shadowing) 경우와 다른 경우들을 정확하게 지적해 줄 것이다.
 
-### Avoid `init()`
+### `init()` 사용을 피해라
 
-Avoid `init()` where possible. When `init()` is unavoidable or desirable, code
-should attempt to:
+가능하다면 `init()` 사용을 피해라. `init()` 을 피할 수 없거나 원하는 경우에는 코드는 다음 사항을 시도해야 한다.
 
-1. Be completely deterministic, regardless of program environment or invocation.
-2. Avoid depending on the ordering or side-effects of other `init()` functions.
-   While `init()` ordering is well-known, code can change, and thus
-   relationships between `init()` functions can make code brittle and
-   error-prone.
-3. Avoid accessing or manipulating global or environment state, such as machine
-   information, environment variables, working directory, program
-   arguments/inputs, etc.
-4. Avoid I/O, including both filesystem, network, and system calls.
+1. 프로그램이 실행되는 환경이나 호출 방식에 관계없이, 코드 동작이 예측가능하고 일관되어야 한다(Be completely deterministic).
+2. 다른 `init()` 함수들의 순서 또는 부작용(side-effect)의 의존성을 피해야한다.
+   `init()`의 순서는 잘 알려져 있지만, 코드가 변경 될 수 있으므로 `init()` 함수들 간의
+   관계는 코드를 망가지기 쉽고 오류가 발생하기 쉽게 만들 수 있다.
+3. 기계정보(machine information), 환경변수(enviroment variables), 작업 디렉토리(working directory),
+   프로그램 인자/입력(argument/input)등과 같은 전역 또는 환경 상태에 접근하거나 조작하지 않도록 해야한다.
+4. 파일시스템, 네트워크, 시스템호출을 포함한 I/O를 피해야 한다.
 
-Code that cannot satisfy these requirements likely belongs as a helper to be
-called as part of `main()` (or elsewhere in a program's lifecycle), or be
-written as part of `main()` itself. In particular, libraries that are intended
-to be used by other programs should take special care to be completely
-deterministic and not perform "init magic".
+이러한 요구사항을 충족시키기 어려운 코드는 `main()`(또는 프로그램 수명 주기의 다른 곳)에서 호출 되는 부수적인
+도우미(helper)가 되거나, 혹은 `main()` 내부에서 직접 작성 될 수 있다.
+특히, 다른 프로그램에서 사용할 목적으로 제작된 라이브러리는 완전히 결정론적(deterministic)이고
+`init magic`을 행하지 않도록 해야한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1502,7 +1498,7 @@ var _defaultFoo = Foo{
     // ...
 }
 
-// or, better, for testability:
+// 또는, 테스트를 유용하게 하기 위한 나은 방법:
 
 var _defaultFoo = defaultFoo()
 
@@ -1524,7 +1520,7 @@ type Config struct {
 var _config Config
 
 func init() {
-    // Bad: based on current directory
+    // Bad: 현재 디렉토리 기준(based on current directory)
     cwd, _ := os.Getwd()
 
     // Bad: I/O
@@ -1562,13 +1558,11 @@ func loadConfig() Config {
 </td></tr>
 </tbody></table>
 
-Considering the above, some situations in which `init()` may be preferable or
-necessary might include:
+위를 고려할 때, `init()` 이 선호되거나 필요한 몇가지 상황은 다음과 같을 수 있다.
 
-- Complex expressions that cannot be represented as single assignments.
-- Pluggable hooks, such as `database/sql` dialects, encoding type registries, etc.
-- Optimizations to [Google Cloud Functions] and other forms of deterministic
-  precomputation.
+- 단일 대입(single assignment)으로 표현할 수 없는 복잡한 표현식
+- `database/sql` 방언(dialect), 인코딩 유형 레지스트리 등과 같은 연결가능한(pluggable) 훅
+- [Google Cloud Functions] 및 결정론적 사전 계산(precomputation)의 다른 형태에 대한 최적화
 
   [Google Cloud Functions]: https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations
 
