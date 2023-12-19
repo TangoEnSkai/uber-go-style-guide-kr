@@ -88,7 +88,7 @@ row before the </tbody></table> line.
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
     - [변경 가능한 전역변수 피하기](#변경-가능한-전역변수-피하기)
     - [공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기)
-    - [Avoid Using Built-In Names](#avoid-using-built-in-names)
+    - [내장된(built-in) 이름 사용을 피해라](#내장된built-in-이름-사용을-피해라)
     - [Avoid `init()`](#avoid-init)
   - [성능(Performance)](#성능performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
@@ -1367,18 +1367,14 @@ func (l *ConcreteList) Remove(e Entity) {
 
 이러한 위임 메서드(delegate method)들을 작성하는 것은 번거로울 수 있지만, 이 추가적인 노력으로 인해 구현 세부사항이 숨겨지고, 변경할 수 있는 기회를 더 많이 제공하며, 또한 문서에서 List 인터페이스 전체를 찾아가는 간접적인 방법을 제거한다.
 
-### Avoid Using Built-In Names
+### 내장된(built-in) 이름 사용을 피해라
 
-The Go [language specification] outlines several built-in,
-[predeclared identifiers] that should not be used as names within Go programs.
+Go [언어 명세(language specification)]에는 Go 프로그램 내에서 이름으로 사용 해서는 안되는 [미리 선언된 식별자(predeclared identifiers)]들이 명시 되어 있다.
 
-Depending on context, reusing these identifiers as names will either shadow
-the original within the current lexical scope (and any nested scopes) or make
-affected code confusing. In the best case, the compiler will complain; in the
-worst case, such code may introduce latent, hard-to-grep bugs.
+상황에 따라, 이러한 식별자(identifier)들을 이름으로 재사용하면 현재 어휘적 스코프(lexical scope) 및 모든 중첩 스코프(nested scope)내에서 원본을 가리게 되거나 영향을 받는 코드를 혼란스럽게 만들 수 있다. 가장 좋은 경우에는 컴파일러가 경고를 표시할 수 있지만; 최악의 경우, 이러한 코드는 잠재적으로 찾기 어려운 버그를 만들 수 있다.
 
-  [language specification]: https://golang.org/ref/spec
-  [predeclared identifiers]: https://golang.org/ref/spec#Predeclared_identifiers
+  [언어 명세(language specification)]: https://golang.org/ref/spec
+  [미리 선언된 식별자(predeclared identifiers)]: https://golang.org/ref/spec#Predeclared_identifiers
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1414,23 +1410,23 @@ func handleErrorMessage(msg string) {
 
 ```go
 type Foo struct {
-    // While these fields technically don't
-    // constitute shadowing, grepping for
-    // `error` or `string` strings is now
-    // ambiguous.
+    // 이러한 필드는 기술적으로 섀도잉(shadowing)을
+    // 구성하지는 않지만
+    // `error` 또는 `string` 문자열은 이제
+    // 모호해졌다.
     error  error
     string string
 }
 
 func (f Foo) Error() error {
-    // `error` and `f.error` are
-    // visually similar
+    // `error` 와 `f.error`는
+    // 시각적으로 유사하다.
     return f.error
 }
 
 func (f Foo) String() string {
-    // `string` and `f.string` are
-    // visually similar
+    // `string` 과 `f.string`은
+    // 시각적으로 유사하다.
     return f.string
 }
 ```
@@ -1439,8 +1435,8 @@ func (f Foo) String() string {
 
 ```go
 type Foo struct {
-    // `error` and `string` strings are
-    // now unambiguous.
+    // `error` 와 `string` 문자열은
+    // 이제 모호하지 않다.
     err error
     str string
 }
@@ -1457,10 +1453,7 @@ func (f Foo) String() string {
 </td></tr>
 </tbody></table>
 
-
-Note that the compiler will not generate errors when using predeclared
-identifiers, but tools such as `go vet` should correctly point out these and
-other cases of shadowing.
+컴파일는 미리 선언된 식별자(predeclared identifier)들을 사용 할 때 오류를 생성하지 않지만, `go vet`과 같은 도구는 이와 같은 섀도잉(shadowing) 경우와 다른 경우들을 정확하게 지적해 줄 것이다.
 
 ### Avoid `init()`
 
