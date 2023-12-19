@@ -86,7 +86,7 @@ row before the </tbody></table> line.
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#타입의-어설션-실패-다루기-handle-type-assertion-failures)
     - [패닉을 피할 것 (Don't Panic)](#패닉을-피할-것-dont-panic)
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
-    - [변경 가능한 전역변수 피하기](#변경-가능한-전역변수-피하기)
+    - [변경 가능한(mutable) 전역변수 피하기](#변경-가능한mutable-전역변수-피하기)
     - [공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기)
     - [내장된(built-in) 이름 사용을 피해라](#내장된built-in-이름-사용을-피해라)
     - [`init()` 사용을 피해라](#init-사용을-피해라)
@@ -1169,9 +1169,9 @@ func (f *foo) isRunning() bool {
 </td></tr>
 </tbody></table>
 
-### 변경 가능한 전역변수 피하기
+### 변경 가능한(mutable) 전역변수 피하기
 
-변경 가능한 전역변수를 피하고, 대신 의존성 주입을 선택해라.
+변경 가능한(mutable) 전역변수를 피하고, 대신 의존성 주입을 선택해라.
 이 사항은 함수 포인터뿐만 아니라 다른 종류의 값에도 적용된다.
 
 <table>
