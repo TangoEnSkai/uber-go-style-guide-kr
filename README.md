@@ -86,7 +86,7 @@ row before the </tbody></table> line.
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#타입의-어설션-실패-다루기-handle-type-assertion-failures)
     - [패닉을 피할 것 (Don't Panic)](#패닉을-피할-것-dont-panic)
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
-    - [Avoid Mutable Globals](#avoid-mutable-globals)
+    - [변경 가능한 전역변수 피하기](#변경-가능한-전역변수-피하기)
     - [Avoid Embedding Types in Public Structs](#avoid-embedding-types-in-public-structs)
     - [Avoid Using Built-In Names](#avoid-using-built-in-names)
     - [Avoid `init()`](#avoid-init)
@@ -1169,10 +1169,10 @@ func (f *foo) isRunning() bool {
 </td></tr>
 </tbody></table>
 
-### Avoid Mutable Globals
+### 변경 가능한 전역변수 피하기
 
-Avoid mutating global variables, instead opting for dependency injection.
-This applies to function pointers as well as other kinds of values.
+변경 가능한 전역변수를 피하고, 대신 의존성 주입을 선택해라.
+이 사항은 함수 포인터뿐만 아니라 다른 종류의 값에도 적용된다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
