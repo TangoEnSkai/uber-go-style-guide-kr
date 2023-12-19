@@ -80,7 +80,7 @@ row before the </tbody></table> line.
     - [시간을 처리하려면 `"time"`을 사용하라](#시간을-처리하려면-time을-사용하라)
       - [시간의 순간(instants of time)을 나타내기 위해서는 `time.Time` 를 사용하라](#시간의-순간instants-of-time을-나타내기-위해서는-timetime-를-사용하라)
       - [시간의 기간(periods of time)을 나타내기 위해 `time.Duration` 을 사용하라](#시간의-기간periods-of-time을-나타내기-위해-timeduration-을-사용하라)
-      - [외부 시스템과 함께  `time.Time` 과 `time.Duration`을 사용하라](#외부-시스템과-함께--timetime-과-timeduration을-사용하라)
+      - [`time.Time` 과 `time.Duration`을 외부 시스템과 사용하기](#timetime-과-timeduration을-외부-시스템과-사용하기)
     - [에러 형(Error Types)](#에러-형error-types)
     - [오류 래핑(Error Wrapping)](#오류-래핑error-wrapping)
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#타입의-어설션-실패-다루기-handle-type-assertion-failures)
@@ -703,7 +703,7 @@ newDay := t.AddDate(0 /* years */, 0 /* months */, 1 /* days */)
 maybeNewDay := t.Add(24 * time.Hour)
 ```
 
-#### 외부 시스템과 함께  `time.Time` 과 `time.Duration`을 사용하라
+#### `time.Time` 과 `time.Duration`을 외부 시스템과 사용하기
 
 가능한 경우 외부 시스템과 상호작용 할 때는 `time.Duration` 과 `time.Time` 을 사용해라.
 에를 들면:
