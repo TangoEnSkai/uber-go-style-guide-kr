@@ -87,7 +87,7 @@ row before the </tbody></table> line.
     - [패닉을 피할 것 (Don't Panic)](#패닉을-피할-것-dont-panic)
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
     - [변경 가능한 전역변수 피하기](#변경-가능한-전역변수-피하기)
-    - [Avoid Embedding Types in Public Structs](#avoid-embedding-types-in-public-structs)
+    - [공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기)
     - [Avoid Using Built-In Names](#avoid-using-built-in-names)
     - [Avoid `init()`](#avoid-init)
   - [성능(Performance)](#성능performance)
@@ -1245,16 +1245,14 @@ func TestSigner(t *testing.T) {
 </td></tr>
 </tbody></table>
 
-### Avoid Embedding Types in Public Structs
+### 공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기
 
-These embedded types leak implementation details, inhibit type evolution, and
-obscure documentation.
+이러한 내장된(embedded) 타입들은 구현 세부사항을 노출시키고, 타입 구조를 발전시키는 것을 어렵게 하며,
+문서화를 어렵게 한다.
 
-Assuming you have implemented a variety of list types using a shared
-`AbstractList`, avoid embedding the `AbstractList` in your concrete list
-implementations.
-Instead, hand-write only the methods to your concrete list that will delegate
-to the abstract list.
+여러 종류의 리스트 유형을 공유된 `AbstractList`를 사용하여 구현한다고 가정하면,
+구체적인 구현체에 `AbstractList`를 내장(embedding)하는 것을 피하라.
+대신, 추상 목록에 위임할 구체적인 목록의 메서드(method)만 직접 작성하라.
 
 ```go
 type AbstractList struct {}
@@ -1304,24 +1302,20 @@ func (l *ConcreteList) Remove(e Entity) {
 </td></tr>
 </tbody></table>
 
-Go allows [type embedding] as a compromise between inheritance and composition.
-The outer type gets implicit copies of the embedded type's methods.
-These methods, by default, delegate to the same method of the embedded
-instance.
+Go는 상속(inheritance)과 합성(composition) 사이의 타협으로 [타입 내장(type embedding)]을 허용한다.
+외부 타입은 내장된 타입의 메서드를 암시적으로 복사한다.
+이러한 메서드는 기본적으로 내장된 인스턴스의 동일한 메서드에 위임된다.
 
-  [type embedding]: https://golang.org/doc/effective_go.html#embedding
+  [타입 내장(type embedding)]: https://golang.org/doc/effective_go.html#embedding
 
-The struct also gains a field by the same name as the type.
-So, if the embedded type is public, the field is public.
-To maintain backward compatibility, every future version of the outer type must
-keep the embedded type.
+또한 구조체는 같은 이름의 필드를 획득한다.
+따라서, 내장된 타입(embedded type)이 공개되면, 해당 필드도 공개 된다.
+이전 버전과 호환성을 유지하기 위해, 외부 타입의 향후 버전은 내장된 타입(embedded type)을 계속 유지 해야 한다.
 
-An embedded type is rarely necessary.
-It is a convenience that helps you avoid writing tedious delegate methods.
+내장된 타입(embedded type)은 거의 필요하지 않다.
+이것은 번거로운 대리자 메서드(delegate method)들을 작성하는 것을 피할 수 있는 편의 기능이다.
 
-Even embedding a compatible AbstractList *interface*, instead of the struct,
-would offer the developer more flexibility to change in the future, but still
-leak the detail that the concrete lists use an abstract implementation.
+구조체 대신에 호환가능한 AbstractList *interface* 내장하는게 개발자에게 향후 변경에 대한 더 많은 유연성을 제공하지만, 여전히 구체적인 리스트가 추상적인 구현(abstract implementation)을 사용한다는 세부사항을 노출 시킬 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1364,19 +1358,14 @@ func (l *ConcreteList) Remove(e Entity) {
 </td></tr>
 </tbody></table>
 
-Either with an embedded struct or an embedded interface, the embedded type
-places limits on the evolution of the type.
+내장된 구조체(embedded struct)와 내장된 인터페이스(embedded interface) 모두, 내장된 타입은 타입의 발전(evolution)에 제약을 가한다.
 
-- Adding methods to an embedded interface is a breaking change.
-- Removing methods from an embedded struct is a breaking change.
-- Removing the embedded type is a breaking change.
-- Replacing the embedded type, even with an alternative that satisfies the same
-  interface, is a breaking change.
+- 내장된 인터페이스에 메서드를 추가하는 것은 호환성을 꺠는 변경사항이다.
+- 내장된 구조체에서 메서드를 제거하는 것은 호환성을 깨는 변경사항이다.
+- 내장된 타입을을 제거하는 것은 호환성을 깨는 변경사항이다.
+- 동일한 인터페이스를 충족하는 대안으로 내장된 타입을 대체하는 것조차 호환성을 깨는 변경이다.
 
-Although writing these delegate methods is tedious, the additional effort hides
-an implementation detail, leaves more opportunities for change, and also
-eliminates indirection for discovering the full List interface in
-documentation.
+이러한 위임 메서드(delegate method)들을 작성하는 것은 번거로울 수 있지만, 이 추가적인 노력으로 인해 구현 세부사항이 숨겨지고, 변경할 수 있는 기회를 더 많이 제공하며, 또한 문서에서 List 인터페이스 전체를 찾아가는 간접적인 방법을 제거한다.
 
 ### Avoid Using Built-In Names
 
