@@ -86,6 +86,10 @@ row before the </tbody></table> line.
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#타입의-어설션-실패-다루기-handle-type-assertion-failures)
     - [패닉을 피할 것 (Don't Panic)](#패닉을-피할-것-dont-panic)
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
+    - [Avoid Mutable Globals](#avoid-mutable-globals)
+    - [Avoid Embedding Types in Public Structs](#avoid-embedding-types-in-public-structs)
+    - [Avoid Using Built-In Names](#avoid-using-built-in-names)
+    - [Avoid `init()`](#avoid-init)
   - [성능(Performance)](#성능performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
     - [string-to-byte 변환을 피해라](#string-to-byte-변환을-피해라)
@@ -1164,6 +1168,427 @@ func (f *foo) isRunning() bool {
 
 </td></tr>
 </tbody></table>
+
+### Avoid Mutable Globals
+
+Avoid mutating global variables, instead opting for dependency injection.
+This applies to function pointers as well as other kinds of values.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// sign.go
+
+var _timeNow = time.Now
+
+func sign(msg string) string {
+  now := _timeNow()
+  return signWithTime(msg, now)
+}
+```
+
+</td><td>
+
+```go
+// sign.go
+
+type signer struct {
+  now func() time.Time
+}
+
+func newSigner() *signer {
+  return &signer{
+    now: time.Now,
+  }
+}
+
+func (s *signer) Sign(msg string) string {
+  now := s.now()
+  return signWithTime(msg, now)
+}
+```
+</td></tr>
+<tr><td>
+
+```go
+// sign_test.go
+
+func TestSign(t *testing.T) {
+  oldTimeNow := _timeNow
+  _timeNow = func() time.Time {
+    return someFixedTime
+  }
+  defer func() { _timeNow = oldTimeNow }()
+
+  assert.Equal(t, want, sign(give))
+}
+```
+
+</td><td>
+
+```go
+// sign_test.go
+
+func TestSigner(t *testing.T) {
+  s := newSigner()
+  s.now = func() time.Time {
+    return someFixedTime
+  }
+
+  assert.Equal(t, want, s.Sign(give))
+}
+```
+
+</td></tr>
+</tbody></table>
+
+### Avoid Embedding Types in Public Structs
+
+These embedded types leak implementation details, inhibit type evolution, and
+obscure documentation.
+
+Assuming you have implemented a variety of list types using a shared
+`AbstractList`, avoid embedding the `AbstractList` in your concrete list
+implementations.
+Instead, hand-write only the methods to your concrete list that will delegate
+to the abstract list.
+
+```go
+type AbstractList struct {}
+
+// Add adds an entity to the list.
+func (l *AbstractList) Add(e Entity) {
+  // ...
+}
+
+// Remove removes an entity from the list.
+func (l *AbstractList) Remove(e Entity) {
+  // ...
+}
+```
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  *AbstractList
+}
+```
+
+</td><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  list *AbstractList
+}
+
+// Add adds an entity to the list.
+func (l *ConcreteList) Add(e Entity) {
+  l.list.Add(e)
+}
+
+// Remove removes an entity from the list.
+func (l *ConcreteList) Remove(e Entity) {
+  l.list.Remove(e)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+Go allows [type embedding] as a compromise between inheritance and composition.
+The outer type gets implicit copies of the embedded type's methods.
+These methods, by default, delegate to the same method of the embedded
+instance.
+
+  [type embedding]: https://golang.org/doc/effective_go.html#embedding
+
+The struct also gains a field by the same name as the type.
+So, if the embedded type is public, the field is public.
+To maintain backward compatibility, every future version of the outer type must
+keep the embedded type.
+
+An embedded type is rarely necessary.
+It is a convenience that helps you avoid writing tedious delegate methods.
+
+Even embedding a compatible AbstractList *interface*, instead of the struct,
+would offer the developer more flexibility to change in the future, but still
+leak the detail that the concrete lists use an abstract implementation.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// AbstractList is a generalized implementation
+// for various kinds of lists of entities.
+type AbstractList interface {
+  Add(Entity)
+  Remove(Entity)
+}
+
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  AbstractList
+}
+```
+
+</td><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  list AbstractList
+}
+
+// Add adds an entity to the list.
+func (l *ConcreteList) Add(e Entity) {
+  l.list.Add(e)
+}
+
+// Remove removes an entity from the list.
+func (l *ConcreteList) Remove(e Entity) {
+  l.list.Remove(e)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+Either with an embedded struct or an embedded interface, the embedded type
+places limits on the evolution of the type.
+
+- Adding methods to an embedded interface is a breaking change.
+- Removing methods from an embedded struct is a breaking change.
+- Removing the embedded type is a breaking change.
+- Replacing the embedded type, even with an alternative that satisfies the same
+  interface, is a breaking change.
+
+Although writing these delegate methods is tedious, the additional effort hides
+an implementation detail, leaves more opportunities for change, and also
+eliminates indirection for discovering the full List interface in
+documentation.
+
+### Avoid Using Built-In Names
+
+The Go [language specification] outlines several built-in,
+[predeclared identifiers] that should not be used as names within Go programs.
+
+Depending on context, reusing these identifiers as names will either shadow
+the original within the current lexical scope (and any nested scopes) or make
+affected code confusing. In the best case, the compiler will complain; in the
+worst case, such code may introduce latent, hard-to-grep bugs.
+
+  [language specification]: https://golang.org/ref/spec
+  [predeclared identifiers]: https://golang.org/ref/spec#Predeclared_identifiers
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+var error string
+// `error` shadows the builtin
+
+// or
+
+func handleErrorMessage(error string) {
+    // `error` shadows the builtin
+}
+```
+
+</td><td>
+
+```go
+var errorMessage string
+// `error` refers to the builtin
+
+// or
+
+func handleErrorMessage(msg string) {
+    // `error` refers to the builtin
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Foo struct {
+    // While these fields technically don't
+    // constitute shadowing, grepping for
+    // `error` or `string` strings is now
+    // ambiguous.
+    error  error
+    string string
+}
+
+func (f Foo) Error() error {
+    // `error` and `f.error` are
+    // visually similar
+    return f.error
+}
+
+func (f Foo) String() string {
+    // `string` and `f.string` are
+    // visually similar
+    return f.string
+}
+```
+
+</td><td>
+
+```go
+type Foo struct {
+    // `error` and `string` strings are
+    // now unambiguous.
+    err error
+    str string
+}
+
+func (f Foo) Error() error {
+    return f.err
+}
+
+func (f Foo) String() string {
+    return f.str
+}
+```
+
+</td></tr>
+</tbody></table>
+
+
+Note that the compiler will not generate errors when using predeclared
+identifiers, but tools such as `go vet` should correctly point out these and
+other cases of shadowing.
+
+### Avoid `init()`
+
+Avoid `init()` where possible. When `init()` is unavoidable or desirable, code
+should attempt to:
+
+1. Be completely deterministic, regardless of program environment or invocation.
+2. Avoid depending on the ordering or side-effects of other `init()` functions.
+   While `init()` ordering is well-known, code can change, and thus
+   relationships between `init()` functions can make code brittle and
+   error-prone.
+3. Avoid accessing or manipulating global or environment state, such as machine
+   information, environment variables, working directory, program
+   arguments/inputs, etc.
+4. Avoid I/O, including both filesystem, network, and system calls.
+
+Code that cannot satisfy these requirements likely belongs as a helper to be
+called as part of `main()` (or elsewhere in a program's lifecycle), or be
+written as part of `main()` itself. In particular, libraries that are intended
+to be used by other programs should take special care to be completely
+deterministic and not perform "init magic".
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type Foo struct {
+    // ...
+}
+
+var _defaultFoo Foo
+
+func init() {
+    _defaultFoo = Foo{
+        // ...
+    }
+}
+```
+
+</td><td>
+
+```go
+var _defaultFoo = Foo{
+    // ...
+}
+
+// or, better, for testability:
+
+var _defaultFoo = defaultFoo()
+
+func defaultFoo() Foo {
+    return Foo{
+        // ...
+    }
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Config struct {
+    // ...
+}
+
+var _config Config
+
+func init() {
+    // Bad: based on current directory
+    cwd, _ := os.Getwd()
+
+    // Bad: I/O
+    raw, _ := os.ReadFile(
+        path.Join(cwd, "config", "config.yaml"),
+    )
+
+    yaml.Unmarshal(raw, &_config)
+}
+```
+
+</td><td>
+
+```go
+type Config struct {
+    // ...
+}
+
+func loadConfig() Config {
+    cwd, err := os.Getwd()
+    // handle err
+
+    raw, err := os.ReadFile(
+        path.Join(cwd, "config", "config.yaml"),
+    )
+    // handle err
+
+    var config Config
+    yaml.Unmarshal(raw, &config)
+
+    return config
+}
+```
+
+</td></tr>
+</tbody></table>
+
+Considering the above, some situations in which `init()` may be preferable or
+necessary might include:
+
+- Complex expressions that cannot be represented as single assignments.
+- Pluggable hooks, such as `database/sql` dialects, encoding type registries, etc.
+- Optimizations to [Google Cloud Functions] and other forms of deterministic
+  precomputation.
+
+  [Google Cloud Functions]: https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations
 
 ## 성능(Performance)
 
