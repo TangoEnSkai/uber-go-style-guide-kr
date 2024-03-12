@@ -80,12 +80,16 @@ row before the </tbody></table> line.
     - [시간을 처리하려면 `"time"`을 사용하라](#시간을-처리하려면-time을-사용하라)
       - [시간의 순간(instants of time)을 나타내기 위해서는 `time.Time` 를 사용하라](#시간의-순간instants-of-time을-나타내기-위해서는-timetime-를-사용하라)
       - [시간의 기간(periods of time)을 나타내기 위해 `time.Duration` 을 사용하라](#시간의-기간periods-of-time을-나타내기-위해-timeduration-을-사용하라)
-      - [외부 시스템과 함께  `time.Time` 과 `time.Duration`을 사용하라](#외부-시스템과-함께--timetime-과-timeduration을-사용하라)
+      - [`time.Time` 과 `time.Duration`을 외부 시스템과 사용하기](#timetime-과-timeduration을-외부-시스템과-사용하기)
     - [에러 형(Error Types)](#에러-형error-types)
     - [오류 래핑(Error Wrapping)](#오류-래핑error-wrapping)
     - [타입의 어설션 실패 다루기 (Handle Type Assertion Failures)](#타입의-어설션-실패-다루기-handle-type-assertion-failures)
     - [패닉을 피할 것 (Don't Panic)](#패닉을-피할-것-dont-panic)
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
+    - [변경 가능한(mutable) 전역변수 피하기](#변경-가능한mutable-전역변수-피하기)
+    - [공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기)
+    - [내장된(built-in) 이름 사용을 피해라](#내장된built-in-이름-사용을-피해라)
+    - [`init()` 사용을 피해라](#init-사용을-피해라)
   - [성능(Performance)](#성능performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
     - [string-to-byte 변환을 피해라](#string-to-byte-변환을-피해라)
@@ -703,7 +707,7 @@ newDay := t.AddDate(0 /* years */, 0 /* months */, 1 /* days */)
 maybeNewDay := t.Add(24 * time.Hour)
 ```
 
-#### 외부 시스템과 함께  `time.Time` 과 `time.Duration`을 사용하라
+#### `time.Time` 과 `time.Duration`을 외부 시스템과 사용하기
 
 가능한 경우 외부 시스템과 상호작용 할 때는 `time.Duration` 과 `time.Time` 을 사용해라.
 에를 들면:
@@ -1164,6 +1168,403 @@ func (f *foo) isRunning() bool {
 
 </td></tr>
 </tbody></table>
+
+### 변경 가능한(mutable) 전역변수 피하기
+
+변경 가능한(mutable) 전역변수를 피하고, 대신 의존성 주입을 선택해라.
+이 사항은 함수 포인터뿐만 아니라 다른 종류의 값에도 적용된다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// sign.go
+
+var _timeNow = time.Now
+
+func sign(msg string) string {
+  now := _timeNow()
+  return signWithTime(msg, now)
+}
+```
+
+</td><td>
+
+```go
+// sign.go
+
+type signer struct {
+  now func() time.Time
+}
+
+func newSigner() *signer {
+  return &signer{
+    now: time.Now,
+  }
+}
+
+func (s *signer) Sign(msg string) string {
+  now := s.now()
+  return signWithTime(msg, now)
+}
+```
+</td></tr>
+<tr><td>
+
+```go
+// sign_test.go
+
+func TestSign(t *testing.T) {
+  oldTimeNow := _timeNow
+  _timeNow = func() time.Time {
+    return someFixedTime
+  }
+  defer func() { _timeNow = oldTimeNow }()
+
+  assert.Equal(t, want, sign(give))
+}
+```
+
+</td><td>
+
+```go
+// sign_test.go
+
+func TestSigner(t *testing.T) {
+  s := newSigner()
+  s.now = func() time.Time {
+    return someFixedTime
+  }
+
+  assert.Equal(t, want, s.Sign(give))
+}
+```
+
+</td></tr>
+</tbody></table>
+
+### 공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기
+
+이러한 내장된(embedded) 타입들은 구현 세부사항을 노출시키고, 타입 구조를 발전시키는 것을 어렵게 하며,
+문서화를 어렵게 한다.
+
+여러 종류의 리스트 유형을 공유된 `AbstractList`를 사용하여 구현한다고 가정하면,
+구체적인 구현체에 `AbstractList`를 내장(embedding)하는 것을 피하라.
+대신, 추상 목록에 위임할 구체적인 목록의 메서드(method)만 직접 작성하라.
+
+```go
+type AbstractList struct {}
+
+// Add adds an entity to the list.
+func (l *AbstractList) Add(e Entity) {
+  // ...
+}
+
+// Remove removes an entity from the list.
+func (l *AbstractList) Remove(e Entity) {
+  // ...
+}
+```
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  *AbstractList
+}
+```
+
+</td><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  list *AbstractList
+}
+
+// Add adds an entity to the list.
+func (l *ConcreteList) Add(e Entity) {
+  l.list.Add(e)
+}
+
+// Remove removes an entity from the list.
+func (l *ConcreteList) Remove(e Entity) {
+  l.list.Remove(e)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+Go는 상속(inheritance)과 합성(composition) 사이의 타협으로 [타입 내장(type embedding)]을 허용한다.
+외부 타입은 내장된 타입의 메서드를 암시적으로 복사한다.
+이러한 메서드는 기본적으로 내장된 인스턴스의 동일한 메서드에 위임된다.
+
+  [타입 내장(type embedding)]: https://golang.org/doc/effective_go.html#embedding
+
+또한 구조체는 같은 이름의 필드를 획득한다.
+따라서, 내장된 타입(embedded type)이 공개되면, 해당 필드도 공개 된다.
+이전 버전과 호환성을 유지하기 위해, 외부 타입의 향후 버전은 내장된 타입(embedded type)을 계속 유지 해야 한다.
+
+내장된 타입(embedded type)은 거의 필요하지 않다.
+이것은 번거로운 대리자 메서드(delegate method)들을 작성하는 것을 피할 수 있는 편의 기능이다.
+
+구조체 대신에 호환가능한 AbstractList *interface* 내장하는게 개발자에게 향후 변경에 대한 더 많은 유연성을 제공하지만, 여전히 구체적인 리스트가 추상적인 구현(abstract implementation)을 사용한다는 세부사항을 노출 시킬 수 있다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// AbstractList is a generalized implementation
+// for various kinds of lists of entities.
+type AbstractList interface {
+  Add(Entity)
+  Remove(Entity)
+}
+
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  AbstractList
+}
+```
+
+</td><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  list AbstractList
+}
+
+// Add adds an entity to the list.
+func (l *ConcreteList) Add(e Entity) {
+  l.list.Add(e)
+}
+
+// Remove removes an entity from the list.
+func (l *ConcreteList) Remove(e Entity) {
+  l.list.Remove(e)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+내장된 구조체(embedded struct)와 내장된 인터페이스(embedded interface) 모두, 내장된 타입은 타입의 발전(evolution)에 제약을 가한다.
+
+- 내장된 인터페이스에 메서드를 추가하는 것은 호환성을 꺠는 변경사항이다.
+- 내장된 구조체에서 메서드를 제거하는 것은 호환성을 깨는 변경사항이다.
+- 내장된 타입을을 제거하는 것은 호환성을 깨는 변경사항이다.
+- 동일한 인터페이스를 충족하는 대안으로 내장된 타입을 대체하는 것조차 호환성을 깨는 변경이다.
+
+이러한 위임 메서드(delegate method)들을 작성하는 것은 번거로울 수 있지만, 이 추가적인 노력으로 인해 구현 세부사항이 숨겨지고, 변경할 수 있는 기회를 더 많이 제공하며, 또한 문서에서 List 인터페이스 전체를 찾아가는 간접적인 방법을 제거한다.
+
+### 내장된(built-in) 이름 사용을 피해라
+
+Go [언어 명세(language specification)]에는 Go 프로그램 내에서 이름으로 사용 해서는 안되는 [미리 선언된 식별자(predeclared identifiers)]들이 명시 되어 있다.
+
+상황에 따라, 이러한 식별자(identifier)들을 이름으로 재사용하면 현재 어휘적 스코프(lexical scope) 및 모든 중첩 스코프(nested scope)내에서 원본을 가리게 되거나 영향을 받는 코드를 혼란스럽게 만들 수 있다. 가장 좋은 경우에는 컴파일러가 경고를 표시할 수 있지만; 최악의 경우, 이러한 코드는 잠재적으로 찾기 어려운 버그를 만들 수 있다.
+
+  [언어 명세(language specification)]: https://golang.org/ref/spec
+  [미리 선언된 식별자(predeclared identifiers)]: https://golang.org/ref/spec#Predeclared_identifiers
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+var error string
+// `error` shadows the builtin
+
+// or
+
+func handleErrorMessage(error string) {
+    // `error` shadows the builtin
+}
+```
+
+</td><td>
+
+```go
+var errorMessage string
+// `error` refers to the builtin
+
+// or
+
+func handleErrorMessage(msg string) {
+    // `error` refers to the builtin
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Foo struct {
+    // 이러한 필드는 기술적으로 섀도잉(shadowing)을
+    // 구성하지는 않지만
+    // `error` 또는 `string` 문자열은 이제
+    // 모호해졌다.
+    error  error
+    string string
+}
+
+func (f Foo) Error() error {
+    // `error` 와 `f.error`는
+    // 시각적으로 유사하다.
+    return f.error
+}
+
+func (f Foo) String() string {
+    // `string` 과 `f.string`은
+    // 시각적으로 유사하다.
+    return f.string
+}
+```
+
+</td><td>
+
+```go
+type Foo struct {
+    // `error` 와 `string` 문자열은
+    // 이제 모호하지 않다.
+    err error
+    str string
+}
+
+func (f Foo) Error() error {
+    return f.err
+}
+
+func (f Foo) String() string {
+    return f.str
+}
+```
+
+</td></tr>
+</tbody></table>
+
+컴파일는 미리 선언된 식별자(predeclared identifier)들을 사용 할 때 오류를 생성하지 않지만, `go vet`과 같은 도구는 이와 같은 섀도잉(shadowing) 경우와 다른 경우들을 정확하게 지적해 줄 것이다.
+
+### `init()` 사용을 피해라
+
+가능하다면 `init()` 사용을 피해라. `init()` 을 피할 수 없거나 원하는 경우에는 코드는 다음 사항을 시도해야 한다.
+
+1. 프로그램이 실행되는 환경이나 호출 방식에 관계없이, 코드 동작이 예측가능하고 일관되어야 한다(Be completely deterministic).
+2. 다른 `init()` 함수들의 순서 또는 부작용(side-effect)의 의존성을 피해야한다.
+   `init()`의 순서는 잘 알려져 있지만, 코드가 변경 될 수 있으므로 `init()` 함수들 간의
+   관계는 코드를 망가지기 쉽고 오류가 발생하기 쉽게 만들 수 있다.
+3. 기계정보(machine information), 환경변수(enviroment variables), 작업 디렉토리(working directory),
+   프로그램 인자/입력(argument/input)등과 같은 전역 또는 환경 상태에 접근하거나 조작하지 않도록 해야한다.
+4. 파일시스템, 네트워크, 시스템호출을 포함한 I/O를 피해야 한다.
+
+이러한 요구사항을 충족시키기 어려운 코드는 `main()`(또는 프로그램 수명 주기의 다른 곳)에서 호출 되는 부수적인
+도우미(helper)가 되거나, 혹은 `main()` 내부에서 직접 작성 될 수 있다.
+특히, 다른 프로그램에서 사용할 목적으로 제작된 라이브러리는 완전히 결정론적(deterministic)이고
+`init magic`을 행하지 않도록 해야한다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type Foo struct {
+    // ...
+}
+
+var _defaultFoo Foo
+
+func init() {
+    _defaultFoo = Foo{
+        // ...
+    }
+}
+```
+
+</td><td>
+
+```go
+var _defaultFoo = Foo{
+    // ...
+}
+
+// 또는, 테스트를 유용하게 하기 위한 나은 방법:
+
+var _defaultFoo = defaultFoo()
+
+func defaultFoo() Foo {
+    return Foo{
+        // ...
+    }
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Config struct {
+    // ...
+}
+
+var _config Config
+
+func init() {
+    // Bad: 현재 디렉토리 기준(based on current directory)
+    cwd, _ := os.Getwd()
+
+    // Bad: I/O
+    raw, _ := os.ReadFile(
+        path.Join(cwd, "config", "config.yaml"),
+    )
+
+    yaml.Unmarshal(raw, &_config)
+}
+```
+
+</td><td>
+
+```go
+type Config struct {
+    // ...
+}
+
+func loadConfig() Config {
+    cwd, err := os.Getwd()
+    // handle err
+
+    raw, err := os.ReadFile(
+        path.Join(cwd, "config", "config.yaml"),
+    )
+    // handle err
+
+    var config Config
+    yaml.Unmarshal(raw, &config)
+
+    return config
+}
+```
+
+</td></tr>
+</tbody></table>
+
+위를 고려할 때, `init()` 이 선호되거나 필요한 몇가지 상황은 다음과 같을 수 있다.
+
+- 단일 대입(single assignment)으로 표현할 수 없는 복잡한 표현식
+- `database/sql` 방언(dialect), 인코딩 유형 레지스트리 등과 같은 연결가능한(pluggable) 훅
+- [Google Cloud Functions] 및 결정론적 사전 계산(precomputation)의 다른 형태에 대한 최적화
+
+  [Google Cloud Functions]: https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations
 
 ## 성능(Performance)
 
