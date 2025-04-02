@@ -7,7 +7,7 @@
 
 - **한국어 번역본**
   - 초벌 번역은 [uber-go/guide](https://github.com/uber-go/guide)의 2019년 10월 17일 의 style.md 파일을 기반으로 완성되었음.
-  - 기술 용어에 대한 과도한 한국어 번역은 지양하였으며, 특정 용어에 대한 한국어 번역을 했을 때에는 괄호로 원문의 단어를 살려두어 최대한 원문의 의도를 왜곡하지 않는 방향에서 번역 함.
+  - 기술 용어에 대한 과도한 한국어 번역은 지양하였으며, 특정 용어에 대한 한국어 번역을 했을 때에는 괄호로 원문의 단어를 살려두어 최대한 원문의 의도를 왜곡하지 않는 방향에서 번역함.
 
 ---
 
@@ -88,11 +88,11 @@ row before the </tbody></table> line.
     - [go.uber.org/atomic의 사용](#gouberorgatomic의-사용)
     - [변경 가능한(mutable) 전역변수 피하기](#변경-가능한mutable-전역변수-피하기)
     - [공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기)
-    - [내장된(built-in) 이름 사용을 피해라](#내장된built-in-이름-사용을-피해라)
-    - [`init()` 사용을 피해라](#init-사용을-피해라)
+    - [내장된(built-in) 이름 사용을 피하라](#내장된built-in-이름-사용을-피하라)
+    - [`init()` 사용을 피하라](#init-사용을-피하라)
   - [성능(Performance)](#성능performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
-    - [string-to-byte 변환을 피해라](#string-to-byte-변환을-피해라)
+    - [string-to-byte 변환을 피하라](#string-to-byte-변환을-피하라)
   - [스타일 (Style)](#스타일-style)
     - [그룹 유사 선언 (Group Similar Declarations)](#그룹-유사-선언-group-similar-declarations)
     - [Import 그룹 정리/배치 (Import Group Ordering)](#import-그룹-정리배치-import-group-ordering)
@@ -105,11 +105,11 @@ row before the </tbody></table> line.
     - [최상위 변수 선언 (Top-level Variable Declarations)](#최상위-변수-선언-top-level-variable-declarations)
     - [수출되지 않은 전역에 \_을 붙여라 (Prefix Unexported Globals with \_)](#수출되지-않은-전역에-_을-붙여라-prefix-unexported-globals-with-_)
     - [구조체에서의 임베딩 (Embedding in Structs)](#구조체에서의-임베딩-embedding-in-structs)
-    - [구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)](#구조체-초기화를-위해-필드를-사용해라-use-field-names-to-initialize-structs)
+    - [구조체 초기화를 위해 필드를 사용하라 (Use Field Names to initialize Structs)](#구조체-초기화를-위해-필드를-사용하라-use-field-names-to-initialize-structs)
     - [지역 변수 선언 (Local Variable Declarations)](#지역-변수-선언-local-variable-declarations)
     - [nil은 유효한 슬라이스 (nil is a valid slice)](#nil은-유효한-슬라이스-nil-is-a-valid-slice)
     - [변수의 범위를 줄여라 (Reduce Scope of Variables)](#변수의-범위를-줄여라-reduce-scope-of-variables)
-    - [Naked 매개변수를 피해라 (Avoid Naked Parameters)](#naked-매개변수를-피해라-avoid-naked-parameters)
+    - [Naked 매개변수를 피하라 (Avoid Naked Parameters)](#naked-매개변수를-피하라-avoid-naked-parameters)
     - [이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)](#이스케이핑을-피하기-위해-원시-문자-리터럴-사용-use-raw-string-literals-to-avoid-escaping)
     - [구조체 참조 초기화 (Initializing Struct References)](#구조체-참조-초기화-initializing-struct-references)
     - [Printf외부의 문자열 형식 (Format Strings outside Printf)](#printf외부의-문자열-형식-format-strings-outside-printf)
@@ -123,7 +123,7 @@ row before the </tbody></table> line.
 스타일(styles)은 코드를 관리(govern)하는 컨벤션/규칙(conventions)이다. 컨벤션은 잘 못 이해 될 수 있는데 왜냐하면 단순히 `gofmt`가 수행하는 소스 코드 포맷팅 이외의 의미도 포함하기 때문이다.
 
 이 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것을 자세히 설명하여, 컨벤션의 복잡성을 관리하는 것이다.
-이 컨벤션은 엔지니어가 Go언어을 생산적으로 사용할 수 있도록 하면서 코드를 관리 가능하게 유지하기 위해 존재한다.
+이 컨벤션은 엔지니어가 Go언어를 생산적으로 사용할 수 있도록 하면서 코드를 관리 가능하게 유지하기 위해 존재한다.
 
 이는 원래 [Prashant Varanasi]와 [Simon Newton]이 일부 동료들에게 Go를 사용하면서 개발속도 향상을 도모하기 위해 소개되었다. 수 년에 걸쳐 피드백을 통해 개선하고 있다.
 
@@ -161,7 +161,7 @@ row before the </tbody></table> line.
 
 인터페이스 메서드가 기본 데이터(underlying data)를 수정하도록 하려면 반드시 포인터를 사용해야 한다.
 
-### 인터페이스 컴플라이언스 검증
+### 인터페이스 컴플라이언스 검증 
 
 적절한 경우, 컴파일 시간에 인터페이스 컴플라이언스를 검증한다. 이는 다음을 포함한다:
 - API contract의 일부로 특정 인터페이스를 구현하는데 필요한 exported 타입
@@ -230,8 +230,8 @@ func (h LogHandler) ServeHTTP(
 
 ### 리시버(Receivers)와 인터페이스(Interfaces)
 
-값 리시버가 있는 메서드는 값 뿐만 아니라 포인터에서도 호출할 수 있습니다.
-포인터 리시버 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://golang.org/ref/spec#Method_values))에서만 호출할 수 있습니다.
+값 리시버가 있는 메서드는 값 뿐만 아니라 포인터에서도 호출할 수 있다.
+포인터 리시버 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://golang.org/ref/spec#Method_values))에서만 호출할 수 있다.
 
 예를 들면,
 
@@ -263,7 +263,7 @@ sPtrs[1].Read()
 sPtrs[1].Write("test")
 ```
 
-마찬가지로 메서드에 값 리시버가 있더라도 인터페이스는 포인터로 충족될 수 있습니다.
+마찬가지로 메서드에 값 리시버가 있더라도 인터페이스는 포인터로 충족될 수 있다.
 
 ```go
 type F interface {
@@ -321,7 +321,7 @@ mu.Lock()
 </tbody></table>
 
 포인터로 구조체를 사용하는 경우, 뮤텍스는 포인터가 아닌 필드여야 한다.
-구조체를 내보내지 않는 경우라도(not exported), 구조체에 뮤텍스를 포함하지 마십시오.
+구조체를 내보내지 않는 경우라도(not exported), 구조체에 뮤텍스를 포함하지 않아야 한다.
 
 <table>
 <tbody>
@@ -329,7 +329,7 @@ mu.Lock()
 
 ```go
 type smap struct {
-  sync.Mutex // 오직 수출되지 않은 타입을 위해서 사용
+  sync.Mutex // 오직 export 되지 않은 타입을 위해서 사용
 
   data map[string]string
 }
@@ -533,7 +533,7 @@ return p.count
 
 ### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)
 
-채널의 크기는 일반적으로 1 이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사(scrutiny)를 받아야 한다. 어떻게 크기를 결정(determined)할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
+채널의 크기는 일반적으로 1 이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사를 받아야 한다. 어떻게 크기를 결정할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -597,7 +597,7 @@ const (
 </td></tr>
 </tbody></table>
 
-제로 값(zero value)를 사용하는 것이 적절할 때도 있다. 예를 들면, 제로 값이 0인 경우 바람직한 기본 동작(default behaviour)이다.
+제로 값(zero value)를 사용하는 것이 적절할 때도 있다. 예를 들면, 제로 값이 0인 경우 바람직한 기본 동작이다.
 
 ```go
 type LogOutput int
@@ -624,14 +624,14 @@ const (
 예를들면, *1* 은 특정 시점에 24시간을 더한다고 해서 항상 새로운 날짜가 되는 것은 아니라는 뜻이다.
 
 그러므로, 시간을 다룰 때에는 [`"time"`] 패키지를 사용해야 한다.
-잘못 된 가정들을 더 안전하고 정확한 방식으로 처리하는데 도움을 주기 때문입니다.
+잘못 된 가정들을 더 안전하고 정확한 방식으로 처리하는데 도움을 주기 때문이다.
 
   [`"time"`]: https://golang.org/pkg/time/
 
 #### 시간의 순간(instants of time)을 나타내기 위해서는 `time.Time` 를 사용하라
 
 시간의 순간(instants of time)을 처리할 때는 [`time.Time`] 패키지를 사용하고,
-시간을 비교하거나 더하거나 빼는 작업을 할때는 `time.Time`의 메서드를 사용해라.
+시간을 비교하거나 더하거나 빼는 작업을 할때는 `time.Time`의 메서드를 사용하라.
 
   [`time.Time`]: https://golang.org/pkg/time/#Time
 
@@ -709,17 +709,17 @@ maybeNewDay := t.Add(24 * time.Hour)
 
 #### `time.Time` 과 `time.Duration`을 외부 시스템과 사용하기
 
-가능한 경우 외부 시스템과 상호작용 할 때는 `time.Duration` 과 `time.Time` 을 사용해라.
+가능한 경우 외부 시스템과 상호작용 할 때는 `time.Duration` 과 `time.Time` 을 사용하라.
 에를 들면:
 
 - Command-line flags: [`flag`] 는 [`time.ParseDuration`]를 통해
-  `time.Duration`을 지원한다.
+  `time.Duration`을 지원.
 - JSON: [`encoding/json`]은 [`UnmarshalJSON` 메서드]를 통해 `time.Time`을
-  [RFC 3339] 문자열로 인코딩하는 것을 지원합니다.
+  [RFC 3339] 문자열로 인코딩하는 것을 지원.
 - SQL: [`database/sql`]은 `DATETIME` 또는 `TIMESTAMP` 열을 `time.Time`으로 변환하고
-  기본 드라이버가 지원하는 경우 그 반대로 변환하는 것을 지원합니다.
+  기본 드라이버가 지원하는 경우 그 반대로 변환하는 것을 지원.
 - YAML: [`gopkg.in/yaml.v2`]는 [RFC 3339] 문자열로 `time.Time`을 지원하고
-  [`time.ParseDuration`]을 통해 `time.Duration`을 지원합니다.
+  [`time.ParseDuration`]을 통해 `time.Duration`을 지원.
 
   [`flag`]: https://golang.org/pkg/flag/
   [`time.ParseDuration`]: https://golang.org/pkg/time/#ParseDuration
@@ -730,7 +730,7 @@ maybeNewDay := t.Add(24 * time.Hour)
   [`gopkg.in/yaml.v2`]: https://godoc.org/gopkg.in/yaml.v2
 
 `time.Duration`을 사용할 수 없는 경우,
-`int` 나 `float64`를 사용하고 필드 이름에 단위를 포함해라.
+`int` 나 `float64`를 사용하고 필드 이름에 단위를 포함하라.
 
 예를 들어, `encoding/json` 이 `time.Duration`을 지원하지 않기 때문에
 필드 이름에 단위를 포함해야 한다.
@@ -760,7 +760,7 @@ type Config struct {
 </tbody></table>
 
 `time.Time`을 사용할 수 없는 경우, 대안이 합의되지 않았다면 [RFC 3339]에 정의된
-타임스탬프 형식으로 `string` 사용해라.
+타임스탬프 형식으로 `string` 사용하라.
 이 형식은 [`Time.UnmarshalText`]에서 기본적으로 사용되며, [`time.RFC3339`]를 통해
 `time.format` 및 `time.Parse`에서 사용 할 수 있다.
 
@@ -769,7 +769,7 @@ type Config struct {
 
 실제로는 문제가 되지 않는 경향이 있지만, `"time"` 패키지는 윤초(leap seconds)가
 포함된 타임스탬프 구문 분석을 지원하지 않으며([8728]), 계산 시 윤초(leap seconds)를
-고려하지도 않습니다([15190]). 만약 두 시간의 순간(instants of time)을 비교한다면,
+고려하지도 않는다([15190]). 만약 두 시간의 순간(instants of time)을 비교한다면,
 그 사이에 발생 할 수 있는 윤초(leap seconds)는 차이에 반영 되지 않을 것 이다.
 
   [8728]: https://github.com/golang/go/issues/8728
@@ -797,7 +797,7 @@ type Config struct {
   [`fmt.Errorf`]: https://golang.org/pkg/fmt/#Errorf
   [`"pkg/errors".Wrap`]: https://godoc.org/github.com/pkg/errors#Wrap
 
-만약 클라이언트가 오류를 감지해야 하고, 여러분들이 [`errors.New`]을 사용하여 간단한 에러를 생성한 경우, `var`에 에러를 사용해라.
+만약 클라이언트가 오류를 감지해야 하고, 여러분들이 [`errors.New`]을 사용하여 간단한 에러를 생성한 경우, `var`에 에러를 사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -946,7 +946,7 @@ if err := foo.Open("foo"); err != nil {
 
 "connection refused"와 같은 모호한 오류보다, 컨텍스트를 추가하는 것을 추천한다. 따라서 여러분들은 "call service foo: connection refused."와 같이 더욱 유용한 에러를 얻을 수 있을 것이다.
 
-반환된 오류에서 컨텍스트를 추가 할 때, "failed to"와 같은 사족의 명백한 문구를 피하며 컨텍스트를 간결하게 유지하도록 해라. 이러한 문구들이 에러가 스택에 퍼지면서/스며들면서(percolates) 계속해서 쌓이게 된다:
+반환된 오류에서 컨텍스트를 추가 할 때, "failed to"와 같은 사족의 명백한 문구를 피하며 컨텍스트를 간결하게 유지하도록 하라. 이러한 문구들이 에러가 스택에 퍼지면서/스며들면서(percolates) 계속해서 쌓이게 된다:
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1171,7 +1171,7 @@ func (f *foo) isRunning() bool {
 
 ### 변경 가능한(mutable) 전역변수 피하기
 
-변경 가능한(mutable) 전역변수를 피하고, 대신 의존성 주입을 선택해라.
+변경 가능한(mutable) 전역변수를 피하고, 대신 의존성 주입을 선택하라.
 이 사항은 함수 포인터뿐만 아니라 다른 종류의 값에도 적용된다.
 
 <table>
@@ -1367,7 +1367,7 @@ func (l *ConcreteList) Remove(e Entity) {
 
 이러한 위임 메서드(delegate method)들을 작성하는 것은 번거로울 수 있지만, 이 추가적인 노력으로 인해 구현 세부사항이 숨겨지고, 변경할 수 있는 기회를 더 많이 제공하며, 또한 문서에서 List 인터페이스 전체를 찾아가는 간접적인 방법을 제거한다.
 
-### 내장된(built-in) 이름 사용을 피해라
+### 내장된(built-in) 이름 사용을 피하라
 
 Go [언어 명세(language specification)]에는 Go 프로그램 내에서 이름으로 사용 해서는 안되는 [미리 선언된 식별자(predeclared identifiers)]들이 명시 되어 있다.
 
@@ -1455,9 +1455,9 @@ func (f Foo) String() string {
 
 컴파일는 미리 선언된 식별자(predeclared identifier)들을 사용 할 때 오류를 생성하지 않지만, `go vet`과 같은 도구는 이와 같은 섀도잉(shadowing) 경우와 다른 경우들을 정확하게 지적해 줄 것이다.
 
-### `init()` 사용을 피해라
+### `init()` 사용을 피하라
 
-가능하다면 `init()` 사용을 피해라. `init()` 을 피할 수 없거나 원하는 경우에는 코드는 다음 사항을 시도해야 한다.
+가능하다면 `init()` 사용을 피하라. `init()` 을 피할 수 없거나 원하는 경우에는 코드는 다음 사항을 시도해야 한다.
 
 1. 프로그램이 실행되는 환경이나 호출 방식에 관계없이, 코드 동작이 예측가능하고 일관되어야 한다(Be completely deterministic).
 2. 다른 `init()` 함수들의 순서 또는 부작용(side-effect)의 의존성을 피해야한다.
@@ -1610,9 +1610,9 @@ BenchmarkStrconv-4    64.2 ns/op    1 allocs/op
 </td></tr>
 </tbody></table>
 
-### string-to-byte 변환을 피해라
+### string-to-byte 변환을 피하라
 
-고정 문자열(fixed string)에서 바이트 슬라이스(byte slices)를 반복해서 생성하지 마라. 대신 변환(conversion)을 한번 실행하고, 결과를 캡쳐해라.
+고정 문자열(fixed string)에서 바이트 슬라이스(byte slices)를 반복해서 생성하지 마라. 대신 변환(conversion)을 한번 실행하고, 결과를 캡쳐하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -1952,7 +1952,7 @@ func calcCost(n []int) int {...}
 
 ### 중첩 감소 (Reduce Nesting)
 
-코드는 에러 케이스 혹은 특수 조건(error cases / special conditions)을 먼저 처리하고 루프를 일찍 리턴하거나 계속 지속함으로써 가능한 중첩(nesting)을 줄일 수 있어야 한다. 여러 레벨로 중첩된(nested multiple levels)코드의 양을 줄이도록 해라.
+코드는 에러 케이스 혹은 특수 조건(error cases / special conditions)을 먼저 처리하고 루프를 일찍 리턴하거나 계속 지속함으로써 가능한 중첩(nesting)을 줄일 수 있어야 한다. 여러 레벨로 중첩된(nested multiple levels)코드의 양을 줄이도록 하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2026,7 +2026,7 @@ if b {
 
 ### 최상위 변수 선언 (Top-level Variable Declarations)
 
-최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식(expression)r과같은 같은 타입이 아닌 이상, 타입을 특정짓지 말라.
+최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용하라. 표현식(expression)r과같은 같은 타입이 아닌 이상, 타입을 특정짓지 말라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2052,7 +2052,7 @@ func F() string { return "A" }
 </td></tr>
 </tbody></table>
 
-표현식의 타입이 원하는 타입과 정확하게 일치하지 않는 경우 타입을 지정해라.
+표현식의 타입이 원하는 타입과 정확하게 일치하지 않는 경우 타입을 지정하라.
 
 ```go
 type myError struct{}
@@ -2067,7 +2067,7 @@ var _e error = F()
 
 ### 수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)
 
-수출되지 않은 최상위(top-level) `var`와 `const`에 접두사 `_`를 붙임으로써 그들이 사용될 때, 전역 기호(global symbols)임을 명확하게 해라.
+수출되지 않은 최상위(top-level) `var`와 `const`에 접두사 `_`를 붙임으로써 그들이 사용될 때, 전역 기호(global symbols)임을 명확하게 하라.
 
 예외: 수출되지 않는 에러 값 (Unexported error values)은 `err`의 접두사를 가져야 한다.
 
@@ -2141,7 +2141,7 @@ type Client struct {
 </td></tr>
 </tbody></table>
 
-### 구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)
+### 구조체 초기화를 위해 필드를 사용하라 (Use Field Names to initialize Structs)
 
 구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
 
@@ -2267,7 +2267,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용해라. `nil`을 체크하지 말 것.
+- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용하라. `nil`을 체크하지 말 것.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2395,7 +2395,7 @@ return nil
 </td></tr>
 </tbody></table>
 
-### Naked 매개변수를 피해라 (Avoid Naked Parameters)
+### Naked 매개변수를 피하라 (Avoid Naked Parameters)
 
 함수 호출에서의 naked parameters는 가독성을 떨어 뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하기 바란다.
 
@@ -2421,7 +2421,7 @@ printInfo("foo", true /* isLocal */, true /* done */)
 </td></tr>
 </tbody></table>
 
-더 나은 방법은, naked `bool` 타입을 더 읽기 쉽고 타입-안정적(type-safe)인 코드를 위해서 사용자 정의 타입(custom type)으로 대체해라. 이를 통해서 향후 해당 매개변수에 대해서 두개 이상의 상태 (true/false)를 허용할 수 있다.
+더 나은 방법은, naked `bool` 타입을 더 읽기 쉽고 타입-안정적(type-safe)인 코드를 위해서 사용자 정의 타입(custom type)으로 대체하라. 이를 통해서 향후 해당 매개변수에 대해서 두개 이상의 상태 (true/false)를 허용할 수 있다.
 
 ```go
 type Region int
@@ -2444,7 +2444,7 @@ func printInfo(name string, region Region, status Status)
 
 ### 이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)
 
-Go는 [raw string literals](https://golang.org/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸쳐친 코드와 따옴표를 함께 포함할 수 있다. 읽기 어려운 hand-escaped strings를 피하기 위해서 원시 문자 리터럴을 사용해라.
+Go는 [raw string literals](https://golang.org/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸쳐친 코드와 따옴표를 함께 포함할 수 있다. 읽기 어려운 hand-escaped strings를 피하기 위해서 원시 문자 리터럴을 사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2466,7 +2466,7 @@ wantError := `unknown error:"test"`
 
 ### 구조체 참조 초기화 (Initializing Struct References)
 
-구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 해라.
+구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2520,19 +2520,19 @@ fmt.Printf(msg, 1, 2)
 
 ### Printf-스타일 함수의 이름 (Naming Printf-style Functions)
 
-`Printf`-스타일의 함수를 선언할 때, `go vet`이 이를 감지하고 형식 문자열 (format string)을 체크 할 수 있는지 확인해라.
+`Printf`-스타일의 함수를 선언할 때, `go vet`이 이를 감지하고 형식 문자열 (format string)을 체크 할 수 있는지 확인하라.
 
 이것은 미리 정의 된 `Printf`-스타일 함수를 사용해야 한다는 것을 의미한다. `go vet`이 이를 디폴트로 체크한다. 자세한 정보는 다음을 참조하기 바란다: [Printf family]
 
   [Printf family]: https://golang.org/cmd/vet/#hdr-Printf_family
 
-미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름을 f로 끝내도록 해라: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
+미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름을 f로 끝내도록 하라: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
 
 ```shell
 $ go vet -printfuncs=wrapf,statusf
 ```
 
-또한 다음을 참고해라: [go vet: Printf family check].
+또한 다음을 참고하라: [go vet: Printf family check].
 
   [go vet: Printf family check]: https://kuzminva.wordpress.com/2017/11/07/go-vet-printf-family-check/
 
@@ -2540,7 +2540,7 @@ $ go vet -printfuncs=wrapf,statusf
 
 ### 테스트 테이블 (Test Tables)
 
-핵심적 테스트 로직(the core test logic)이 반복적일 때, 코드 중복을 피하려면 [subtests]와 함께 table-driven tests를 사용해라.
+핵심적 테스트 로직(the core test logic)이 반복적일 때, 코드 중복을 피하려면 [subtests]와 함께 table-driven tests를 사용하라.
 
   [subtests]: https://blog.golang.org/subtests
 
