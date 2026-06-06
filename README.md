@@ -1145,6 +1145,180 @@ func (f *foo) isRunning() bool {
 </td></tr>
 </tbody></table>
 
+### Main에서 종료하기 (Exit in Main)
+
+Go 프로그램은 즉시 종료하기 위해 [`os.Exit`](https://pkg.go.dev/os#Exit) 또는 [`log.Fatal*`](https://pkg.go.dev/log#Fatal)을 사용한다. (패닉은 프로그램을 종료하는 좋은 방법이 아니다. [패닉을 피할 것](#패닉을-피할-것-dont-panic)을 참고하라.)
+
+`os.Exit` 또는 `log.Fatal*` 중 하나를 **`main()`에서만** 호출하라. 다른 모든 함수는 실패를 알리기 위해 에러를 반환해야 한다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+func main() {
+  body := readFile(path)
+  fmt.Println(body)
+}
+
+func readFile(path string) string {
+  f, err := os.Open(path)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  b, err := io.ReadAll(f)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  return string(b)
+}
+```
+
+</td><td>
+
+```go
+func main() {
+  body, err := readFile(path)
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Println(body)
+}
+
+func readFile(path string) (string, error) {
+  f, err := os.Open(path)
+  if err != nil {
+    return "", err
+  }
+
+  b, err := io.ReadAll(f)
+  if err != nil {
+    return "", err
+  }
+
+  return string(b), nil
+}
+```
+
+</td></tr>
+</tbody></table>
+
+여러 함수에서 종료를 수행하는 프로그램은 몇 가지 문제를 일으킨다:
+
+- 명확하지 않은 제어 흐름: 어떤 함수든 프로그램을 종료할 수 있으므로 제어 흐름을 파악하기 어렵다.
+- 테스트하기 어려움: 프로그램을 종료하는 함수는 해당 함수를 호출하는 테스트도 종료한다. 이로 인해 함수 테스트가 어려워지고 `go test`로 아직 실행되지 않은 다른 테스트를 건너뛸 위험이 생긴다.
+- 클린업(cleanup) 생략: 함수가 프로그램을 종료하면, `defer` 문으로 등록된 함수 호출이 생략된다. 이는 중요한 클린업 작업을 건너뛸 위험을 초래한다.
+
+#### 한 번만 종료하라 (Exit Once)
+
+가능하다면, `main()`에서 `os.Exit` 또는 `log.Fatal`을 **최대 한 번만** 호출하라. 프로그램 실행을 중단하는 여러 에러 시나리오가 있다면, 해당 로직을 별도의 함수로 분리하고 에러를 반환하라.
+
+이를 통해 `main()` 함수를 짧게 유지하고, 핵심 비즈니스 로직을 별도의 테스트 가능한 함수에 담을 수 있다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+package main
+
+func main() {
+  args := os.Args[1:]
+  if len(args) != 1 {
+    log.Fatal("missing file")
+  }
+  name := args[0]
+
+  f, err := os.Open(name)
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer f.Close()
+
+  // 이 줄 이후에 log.Fatal을 호출하면,
+  // f.Close는 호출되지 않는다.
+
+  b, err := io.ReadAll(f)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  // ...
+}
+```
+
+</td><td>
+
+```go
+package main
+
+func main() {
+  if err := run(); err != nil {
+    log.Fatal(err)
+  }
+}
+
+func run() error {
+  args := os.Args[1:]
+  if len(args) != 1 {
+    return errors.New("missing file")
+  }
+  name := args[0]
+
+  f, err := os.Open(name)
+  if err != nil {
+    return err
+  }
+  defer f.Close()
+
+  b, err := io.ReadAll(f)
+  if err != nil {
+    return err
+  }
+
+  // ...
+}
+```
+
+</td></tr>
+</tbody></table>
+
+위 예시는 `log.Fatal`을 사용했지만, 이 가이드라인은 `os.Exit` 또는 `os.Exit`를 호출하는 모든 라이브러리 코드에도 적용된다.
+
+```go
+func main() {
+  if err := run(); err != nil {
+    fmt.Fprintln(os.Stderr, err)
+    os.Exit(1)
+  }
+}
+```
+
+필요에 따라 `run()`의 시그니처를 변경할 수 있다. 예를 들어, 프로그램이 실패 시 특정 종료 코드로 종료해야 한다면, `run()`이 에러 대신 종료 코드를 반환할 수 있다. 이를 통해 유닛 테스트에서도 이 동작을 직접 검증할 수 있다.
+
+```go
+func main() {
+  os.Exit(run(args))
+}
+
+func run() (exitCode int) {
+  // ...
+}
+```
+
+더 일반적으로, 이 예시에서 사용된 `run()` 함수는 특정 방식을 강제하지 않는다. `run()` 함수의 이름, 시그니처, 설정에는 유연성이 있다. 다음과 같이 할 수도 있다:
+
+- 파싱되지 않은 커맨드라인 인수를 받는다 (예: `run(os.Args[1:])`)
+- `main()`에서 커맨드라인 인수를 파싱하여 `run`에 전달한다
+- 커스텀 에러 타입을 사용하여 `main()`에 종료 코드를 전달한다
+- `package main`과 다른 추상화 계층에 비즈니스 로직을 둔다
+
+이 가이드라인은 `main()`에서 실제로 프로세스를 종료하는 단일한 위치가 있어야 함을 요구한다.
+
 ## 성능(Performance)
 
 성능-특정의(performance-specific)가이드라인은 성능에 민감한(hot path) 경우에만 적용된다.
