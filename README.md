@@ -1360,6 +1360,177 @@ bytes, err := json.Marshal(Stock{
 
 이유: 구조체의 직렬화된 형태는 서로 다른 시스템 간의 계약(contract)이다. 필드 이름을 포함한 직렬화된 형태의 구조 변경은 이 계약을 깨뜨린다. 태그 안에 필드 이름을 명시하면 계약을 명확하게 만들고, 리팩토링이나 필드 이름 변경으로 인해 실수로 계약을 깨뜨리는 것을 방지할 수 있다.
 
+### Goroutine을 Fire-and-Forget 방식으로 실행하지 마라 (Don't fire-and-forget goroutines)
+
+Goroutine은 경량이지만 비용이 없는 것은 아니다: 최소한 스택을 위한 메모리와 스케줄링을 위한 CPU가 필요하다. 일반적인 goroutine 사용에서는 이 비용이 작지만, 수명이 제어되지 않는 상태로 대량으로 생성되면 심각한 성능 문제를 일으킬 수 있다. 수명이 관리되지 않는 goroutine은 미사용 객체의 가비지 컬렉션을 방해하거나 더 이상 사용되지 않는 리소스를 계속 보유하는 등의 문제를 야기할 수도 있다.
+
+따라서, 프로덕션 코드에서 goroutine을 누수(leak)시키지 마라. goroutine을 생성할 수 있는 패키지 내의 goroutine 누수를 테스트하려면 [go.uber.org/goleak](https://pkg.go.dev/go.uber.org/goleak)을 사용하라.
+
+일반적으로, 모든 goroutine은 다음 중 하나를 만족해야 한다:
+
+- 실행을 멈출 예측 가능한 시점이 있어야 한다. 또는
+- goroutine에 멈추라는 신호를 보낼 방법이 있어야 한다.
+
+두 경우 모두, goroutine이 종료될 때까지 코드가 블록하여 대기할 방법이 있어야 한다.
+
+예시:
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+go func() {
+  for {
+    flush()
+    time.Sleep(delay)
+  }
+}()
+```
+
+</td><td>
+
+```go
+var (
+  stop = make(chan struct{}) // goroutine에 멈추라고 알린다
+  done = make(chan struct{}) // goroutine이 종료되었음을 알린다
+)
+go func() {
+  defer close(done)
+
+  ticker := time.NewTicker(delay)
+  defer ticker.Stop()
+  for {
+    select {
+    case <-ticker.C:
+      flush()
+    case <-stop:
+      return
+    }
+  }
+}()
+
+// 다른 곳에서...
+close(stop)  // goroutine에 멈추라고 신호를 보낸다
+<-done       // 종료될 때까지 대기한다
+```
+
+</td></tr>
+<tr><td>
+
+이 goroutine을 멈출 방법이 없다.
+애플리케이션이 종료될 때까지 계속 실행된다.
+
+</td><td>
+
+이 goroutine은 `close(stop)`으로 멈출 수 있고,
+`<-done`으로 종료를 대기할 수 있다.
+
+</td></tr>
+</tbody></table>
+
+#### Goroutine이 종료될 때까지 대기하라 (Wait for goroutines to exit)
+
+시스템에 의해 생성된 goroutine의 경우, goroutine이 종료될 때까지 대기할 방법이 있어야 한다. 이를 위한 두 가지 일반적인 방법이 있다:
+
+- 여러 goroutine의 완료를 대기하려면 `sync.WaitGroup`을 사용하라.
+
+  ```go
+  var wg sync.WaitGroup
+  for i := 0; i < N; i++ {
+    wg.Go(...)
+  }
+
+  // 모두 완료될 때까지 대기하려면:
+  wg.Wait()
+  ```
+
+- goroutine이 하나뿐이라면, goroutine이 완료될 때 닫히는 `chan struct{}`를 추가하라.
+
+  ```go
+  done := make(chan struct{})
+  go func() {
+    defer close(done)
+    // ...
+  }()
+
+  // goroutine이 종료될 때까지 대기하려면:
+  <-done
+  ```
+
+#### `init()`에서 goroutine을 사용하지 마라 (No goroutines in `init()`)
+
+`init()` 함수는 goroutine을 생성해서는 안 된다. [Avoid init()](#채널의-크기channel-size는-하나one-혹은-제로none)도 참고하라.
+
+패키지에 백그라운드 goroutine이 필요하다면, goroutine의 수명을 관리하는 객체를 노출해야 한다. 해당 객체는 백그라운드 goroutine에 멈추라는 신호를 보내고 종료를 대기하는 메서드(`Close`, `Stop`, `Shutdown` 등)를 제공해야 한다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+func init() {
+  go doWork()
+}
+
+func doWork() {
+  for {
+    // ...
+  }
+}
+```
+
+</td><td>
+
+```go
+type Worker struct{ /* ... */ }
+
+func NewWorker(...) *Worker {
+  w := &Worker{
+    stop: make(chan struct{}),
+    done: make(chan struct{}),
+    // ...
+  }
+  go w.doWork()
+  return w
+}
+
+func (w *Worker) doWork() {
+  defer close(w.done)
+  for {
+    // ...
+    case <-w.stop:
+      return
+  }
+}
+
+// Shutdown은 worker에 멈추라고 알리고
+// 완료될 때까지 대기한다.
+func (w *Worker) Shutdown() {
+  close(w.stop)
+  <-w.done
+}
+```
+
+</td></tr>
+<tr><td>
+
+사용자가 이 패키지를 임포트할 때 무조건 백그라운드 goroutine을 생성한다.
+사용자는 goroutine을 제어하거나 멈출 방법이 없다.
+
+</td><td>
+
+사용자가 요청한 경우에만 worker를 생성한다.
+사용자가 worker가 사용하는 리소스를 해제할 수 있도록 worker를 종료하는 방법을 제공한다.
+
+worker가 여러 goroutine을 관리한다면 `WaitGroup`을 사용해야 함에 유의하라.
+[Goroutine이 종료될 때까지 대기하라](#goroutine이-종료될-때까지-대기하라-wait-for-goroutines-to-exit)를 참고하라.
+
+</td></tr>
+</tbody></table>
+
 ## 성능(Performance)
 
 성능-특정의(performance-specific)가이드라인은 성능에 민감한(hot path) 경우에만 적용된다.
