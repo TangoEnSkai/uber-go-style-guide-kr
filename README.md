@@ -2866,6 +2866,139 @@ for _, tt := range tests {
 }
 ```
 
+#### 테스트 테이블에서 불필요한 복잡성을 피하라 (Avoid Unnecessary Complexity in Table Tests)
+
+서브테스트에 조건부 assertion이나 다른 분기 로직이 포함되어 있으면 테스트 테이블은 읽고 유지하기 어려울 수 있다. 서브테스트 내에 복잡하거나 조건부 로직이 필요한 경우(즉, `for` 루프 내의 복잡한 로직) 테스트 테이블을 **사용하지 말아야** 한다.
+
+크고 복잡한 테스트 테이블은 테스트 실패를 디버깅하기 어렵게 만들어 가독성과 유지보수성을 해친다.
+
+이런 테스트는 여러 테스트 테이블 또는 여러 개별 `Test...` 함수로 분리해야 한다.
+
+목표로 삼을 이상적인 원칙:
+
+* 가장 좁은 단위의 동작에 집중하라
+* "테스트 깊이"를 최소화하고 조건부 assertion을 피하라 (아래 참고)
+* 모든 테스트에서 테이블의 모든 필드가 사용되도록 하라
+* 모든 테스트 로직이 모든 테이블 케이스에서 실행되도록 하라
+
+여기서 "테스트 깊이"란 "주어진 테스트에서, 이전 assertion이 성립해야 하는 연속적인 assertion의 수"를 의미한다 (cyclomatic complexity와 유사). "얕은" 테스트는 assertion 간의 관계가 적고, 더 중요하게는 기본적으로 조건부가 될 가능성이 적다는 것을 의미한다.
+
+구체적으로, 테스트 테이블은 여러 분기 경로(예: `shouldError`, `expectCall` 등)를 사용하거나, 특정 mock 기대에 대해 많은 `if` 문을 사용하거나(예: `shouldCallFoo`), 테이블 내부에 함수를 배치하는 경우(예: `setupMocks func(*FooMock)`) 혼란스럽고 읽기 어려워질 수 있다.
+
+그러나 변경된 입력에 따라서만 동작이 바뀌는 경우에는, 유사한 케이스를 테스트 테이블로 묶어 모든 입력에 걸쳐 동작이 어떻게 달라지는지 더 잘 보여주는 것이 나을 수 있다. 비교 가능한 단위를 분리하여 비교하기 어렵게 만드는 것보다 낫기 때문이다.
+
+테스트 본문이 짧고 직관적이라면, 성공 케이스와 실패 케이스에 대해 `shouldErr` 같은 테이블 필드로 에러 기대치를 지정하는 단일 분기 경로를 갖는 것도 괜찮다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+func TestComplicatedTable(t *testing.T) {
+  tests := []struct {
+    give          string
+    want          string
+    wantErr       error
+    shouldCallX   bool
+    shouldCallY   bool
+    giveXResponse string
+    giveXErr      error
+    giveYResponse string
+    giveYErr      error
+  }{
+    // ...
+  }
+
+  for _, tt := range tests {
+    t.Run(tt.give, func(t *testing.T) {
+      // setup mocks
+      ctrl := gomock.NewController(t)
+      xMock := xmock.NewMockX(ctrl)
+      if tt.shouldCallX {
+        xMock.EXPECT().Call().Return(
+          tt.giveXResponse, tt.giveXErr,
+        )
+      }
+      yMock := ymock.NewMockY(ctrl)
+      if tt.shouldCallY {
+        yMock.EXPECT().Call().Return(
+          tt.giveYResponse, tt.giveYErr,
+        )
+      }
+
+      got, err := DoComplexThing(tt.give, xMock, yMock)
+
+      // verify results
+      if tt.wantErr != nil {
+        require.EqualError(t, err, tt.wantErr)
+        return
+      }
+      require.NoError(t, err)
+      assert.Equal(t, want, got)
+    })
+  }
+}
+```
+
+</td><td>
+
+```go
+func TestShouldCallX(t *testing.T) {
+  // setup mocks
+  ctrl := gomock.NewController(t)
+  xMock := xmock.NewMockX(ctrl)
+  xMock.EXPECT().Call().Return("XResponse", nil)
+
+  yMock := ymock.NewMockY(ctrl)
+
+  got, err := DoComplexThing("inputX", xMock, yMock)
+
+  require.NoError(t, err)
+  assert.Equal(t, "want", got)
+}
+
+func TestShouldCallYAndFail(t *testing.T) {
+  // setup mocks
+  ctrl := gomock.NewController(t)
+  xMock := xmock.NewMockX(ctrl)
+
+  yMock := ymock.NewMockY(ctrl)
+  yMock.EXPECT().Call().Return("YResponse", nil)
+
+  _, err := DoComplexThing("inputY", xMock, yMock)
+  assert.EqualError(t, err, "Y failed")
+}
+```
+</td></tr>
+</tbody></table>
+
+이러한 복잡성은 테스트의 변경, 이해, 정확성 증명을 더 어렵게 만든다.
+
+엄격한 가이드라인은 없지만, 시스템에 대한 여러 입력/출력에 대해 테스트 테이블과 개별 테스트 중 무엇을 선택할지 결정할 때는 항상 가독성과 유지보수성을 최우선으로 고려해야 한다.
+
+#### 병렬 테스트 (Parallel Tests)
+
+병렬 테스트는, goroutine을 생성하거나 루프 본문의 일부로 참조를 캡처하는 특수한 루프와 마찬가지로, 예상되는 값을 보유하도록 루프의 스코프 내에서 루프 변수를 명시적으로 할당하는 데 주의를 기울여야 한다.
+
+```go
+tests := []struct{
+  give string
+  // ...
+}{
+  // ...
+}
+
+for _, tt := range tests {
+  t.Run(tt.give, func(t *testing.T) {
+    t.Parallel()
+    // ...
+  })
+}
+```
+
+위 예시에서, `t.Parallel()`의 사용 때문에 루프 반복에 스코프가 지정된 `tt` 변수를 선언해야 한다. 그렇지 않으면 대부분의 또는 모든 테스트가 `tt`에 대해 예상치 못한 값을 받거나, 실행되는 동안 변경되는 값을 받게 된다.
+
 ### 기능적 옵션 (Functional Options)
 
 기능적 옵션(functional options)은 일부 내부 구조체 (internal struct)에 정보를 기록하는 불투명한 `Option` 타입 (opaque option type)을 선언하는 패턴이다. 여러분들은 다양한 옵션 (variadic number of these options)을 받아들이고 내부 구조체의 옵션에 의해 기록된 모든 정보에 따라 행동하게 된다(act opon the full info. recorded by the options on the internal struct).
