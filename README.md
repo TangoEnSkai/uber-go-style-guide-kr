@@ -1319,6 +1319,47 @@ func run() (exitCode int) {
 
 이 가이드라인은 `main()`에서 실제로 프로세스를 종료하는 단일한 위치가 있어야 함을 요구한다.
 
+### 직렬화되는 구조체에 필드 태그를 사용하라 (Use field tags in marshaled structs)
+
+JSON, YAML 또는 태그 기반 필드 이름을 지원하는 기타 포맷으로 마샬링(marshaled)되는 구조체 필드에는 관련 태그를 명시해야 한다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type Stock struct {
+  Price int
+  Name  string
+}
+
+bytes, err := json.Marshal(Stock{
+  Price: 137,
+  Name:  "UBER",
+})
+```
+
+</td><td>
+
+```go
+type Stock struct {
+  Price int    `json:"price"`
+  Name  string `json:"name"`
+  // Name을 Symbol로 안전하게 변경할 수 있다.
+}
+
+bytes, err := json.Marshal(Stock{
+  Price: 137,
+  Name:  "UBER",
+})
+```
+
+</td></tr>
+</tbody></table>
+
+이유: 구조체의 직렬화된 형태는 서로 다른 시스템 간의 계약(contract)이다. 필드 이름을 포함한 직렬화된 형태의 구조 변경은 이 계약을 깨뜨린다. 태그 안에 필드 이름을 명시하면 계약을 명확하게 만들고, 리팩토링이나 필드 이름 변경으로 인해 실수로 계약을 깨뜨리는 것을 방지할 수 있다.
+
 ## 성능(Performance)
 
 성능-특정의(performance-specific)가이드라인은 성능에 민감한(hot path) 경우에만 적용된다.
