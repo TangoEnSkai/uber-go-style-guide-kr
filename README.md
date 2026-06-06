@@ -2339,6 +2339,34 @@ var user User
 
 이렇게 하면 제로 값 구조체와 비제로 필드를 가진 구조체를 구분할 수 있으며, [map 초기화](#map-초기화-initializing-maps)에 대해 생성된 구분과 유사하고, 빈 슬라이스 선언 방식과도 일치한다.
 
+#### 구조체 참조 초기화 (Initializing Struct References)
+
+구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 해라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+sval := T{Name: "foo"}
+
+// inconsistent
+sptr := new(T)
+sptr.Name = "bar"
+```
+
+</td><td>
+
+```go
+sval := T{Name: "foo"}
+
+sptr := &T{Name: "bar"}
+```
+
+</td></tr>
+</tbody></table>
+
 ### 지역 변수 선언 (Local Variable Declarations)
 
 변수를 명시적으로 특정 값으로 설정하는 경우 짧은 변수 선언 (Short variable declarations, `:=`)을 사용해야 한다.
@@ -2617,34 +2645,6 @@ wantError := "unknown name:\"test\""
 
 ```go
 wantError := `unknown error:"test"`
-```
-
-</td></tr>
-</tbody></table>
-
-#### 구조체 참조 초기화 (Initializing Struct References)
-
-구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 해라.
-
-<table>
-<thead><tr><th>Bad</th><th>Good</th></tr></thead>
-<tbody>
-<tr><td>
-
-```go
-sval := T{Name: "foo"}
-
-// inconsistent
-sptr := new(T)
-sptr.Name = "bar"
-```
-
-</td><td>
-
-```go
-sval := T{Name: "foo"}
-
-sptr := &T{Name: "bar"}
 ```
 
 </td></tr>
