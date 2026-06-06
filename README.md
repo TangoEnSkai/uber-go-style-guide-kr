@@ -1542,6 +1542,109 @@ func (f Foo) String() string {
 
 사전 선언 식별자를 사용해도 컴파일러가 오류를 발생시키지 않지만, `go vet`과 같은 도구는 이러한 섀도잉 케이스를 올바르게 지적해야 한다.
 
+### `init()` 사용을 피하라 (Avoid `init()`)
+
+가능하면 `init()`을 피하라. `init()`이 불가피하거나 바람직한 경우, 코드는 다음을 시도해야 한다:
+
+1. 프로그램 환경이나 호출 방식에 관계없이 완전히 결정적(deterministic)이어야 한다.
+2. 다른 `init()` 함수의 순서나 부작용(side-effect)에 의존하지 않아야 한다. `init()` 순서는 잘 알려져 있지만, 코드는 변경될 수 있으므로 `init()` 함수 간의 관계는 코드를 취약하고 오류에 취약하게 만들 수 있다.
+3. 머신 정보, 환경 변수, 작업 디렉토리, 프로그램 인수/입력 등 전역 또는 환경 상태에 접근하거나 조작하지 않아야 한다.
+4. 파일시스템, 네트워크, 시스템 콜을 포함한 I/O를 피해야 한다.
+
+이러한 요구사항을 만족할 수 없는 코드는 `main()`의 일부로 호출되는 헬퍼(또는 프로그램 생명주기의 다른 곳)로 만들거나, `main()` 자체의 일부로 작성되어야 한다. 특히, 다른 프로그램에서 사용하도록 의도된 라이브러리는 완전히 결정적이고 "init 마법"을 수행하지 않도록 특별히 주의해야 한다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type Foo struct {
+    // ...
+}
+
+var _defaultFoo Foo
+
+func init() {
+    _defaultFoo = Foo{
+        // ...
+    }
+}
+```
+
+</td><td>
+
+```go
+var _defaultFoo = Foo{
+    // ...
+}
+
+// or, better, for testability:
+
+var _defaultFoo = defaultFoo()
+
+func defaultFoo() Foo {
+    return Foo{
+        // ...
+    }
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Config struct {
+    // ...
+}
+
+var _config Config
+
+func init() {
+    // Bad: based on current directory
+    cwd, _ := os.Getwd()
+
+    // Bad: I/O
+    raw, _ := os.ReadFile(
+        path.Join(cwd, "config", "config.yaml"),
+    )
+
+    yaml.Unmarshal(raw, &_config)
+}
+```
+
+</td><td>
+
+```go
+type Config struct {
+    // ...
+}
+
+func loadConfig() Config {
+    cwd, err := os.Getwd()
+    // handle err
+
+    raw, err := os.ReadFile(
+        path.Join(cwd, "config", "config.yaml"),
+    )
+    // handle err
+
+    var config Config
+    yaml.Unmarshal(raw, &config)
+
+    return config
+}
+```
+
+</td></tr>
+</tbody></table>
+
+위 내용을 고려했을 때, `init()`이 바람직하거나 필요할 수 있는 상황은 다음과 같다:
+
+- 단일 할당으로 표현할 수 없는 복잡한 표현식.
+- `database/sql` 방언, 인코딩 타입 레지스트리 등의 플러그인 가능한 훅(pluggable hook).
+- [Google Cloud Functions](https://cloud.google.com/functions/docs/bestpractices/tips#use_global_variables_to_reuse_objects_in_future_invocations) 및 기타 형태의 결정적 사전 연산(precomputation) 최적화.
+
 ### Main에서 종료하기 (Exit in Main)
 
 Go 프로그램은 즉시 종료하기 위해 [`os.Exit`](https://pkg.go.dev/os#Exit) 또는 [`log.Fatal*`](https://pkg.go.dev/log#Fatal)을 사용한다. (패닉은 프로그램을 종료하는 좋은 방법이 아니다. [패닉을 피할 것](#패닉을-피할-것-dont-panic)을 참고하라.)
