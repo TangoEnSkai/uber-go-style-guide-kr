@@ -1615,6 +1615,111 @@ BenchmarkGood-4  500000000   3.25 ns/op
 </td></tr>
 </tbody></table>
 
+### 컨테이너 용량 지정을 선호하라 (Prefer Specifying Container Capacity)
+
+가능하면 컨테이너 용량을 미리 지정하여 메모리를 미리 할당하라. 이를 통해 요소가 추가될 때 발생하는 후속 할당(컨테이너 복사 및 크기 조정)을 최소화할 수 있다.
+
+#### Map 용량 힌트 지정 (Specifying Map Capacity Hints)
+
+가능하면 `make()`로 map을 초기화할 때 용량 힌트를 제공하라.
+
+```go
+make(map[T1]T2, hint)
+```
+
+`make()`에 용량 힌트를 제공하면 초기화 시점에 map의 크기를 적절히 설정하려 시도하므로, map이 성장하고 요소가 추가될 때 발생하는 할당 필요성을 줄인다.
+
+슬라이스와 달리, map 용량 힌트는 완전한 선제적 할당을 보장하지 않고, 필요한 hashmap 버킷 수를 근사화하는 데 사용된다. 따라서, map에 요소를 추가할 때 지정된 용량까지도 할당이 발생할 수 있다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+files, _ := os.ReadDir("./files")
+
+m := make(map[string]os.DirEntry)
+for _, f := range files {
+    m[f.Name()] = f
+}
+```
+
+</td><td>
+
+```go
+
+files, _ := os.ReadDir("./files")
+
+m := make(map[string]os.DirEntry, len(files))
+for _, f := range files {
+    m[f.Name()] = f
+}
+```
+
+</td></tr>
+<tr><td>
+
+`m`이 크기 힌트 없이 생성되어, 증가하면서 여러 번 할당이 발생한다.
+
+</td><td>
+
+`m`이 크기 힌트와 함께 생성되어, 할당 횟수가 더 적을 수 있다.
+
+</td></tr>
+</tbody></table>
+
+#### 슬라이스 용량 지정 (Specifying Slice Capacity)
+
+가능하면 `make()`로 슬라이스를 초기화할 때, 특히 append를 사용하는 경우 용량 힌트를 제공하라.
+
+```go
+make([]T, length, capacity)
+```
+
+map과 달리, 슬라이스 용량은 힌트가 아니다: 컴파일러는 `make()`에 제공된 용량만큼 메모리를 할당하므로, 슬라이스의 길이가 용량에 도달하기 전까지 후속 `append()` 작업에서 추가 할당이 발생하지 않는다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+for n := 0; n < b.N; n++ {
+  data := make([]int, 0)
+  for k := 0; k < size; k++{
+    data = append(data, k)
+  }
+}
+```
+
+</td><td>
+
+```go
+for n := 0; n < b.N; n++ {
+  data := make([]int, 0, size)
+  for k := 0; k < size; k++{
+    data = append(data, k)
+  }
+}
+```
+
+</td></tr>
+<tr><td>
+
+```plain
+BenchmarkBad-4    100000000    2.48s
+```
+
+</td><td>
+
+```plain
+BenchmarkGood-4   100000000    0.21s
+```
+
+</td></tr>
+</tbody></table>
+
 ## 스타일 (Style)
 
 ### 그룹 유사 선언 (Group Similar Declarations)
