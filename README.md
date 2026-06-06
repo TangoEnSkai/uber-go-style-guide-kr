@@ -153,7 +153,7 @@ row before the </tbody></table> line.
 
 인터페이스 메서드가 기본 데이터(underlying data)를 수정하도록 하려면 반드시 포인터를 사용해야 한다.
 
-### 인터페이스 컴플라이언스 검증
+### 인터페이스 컴플라이언스 검증 (Verify Interface Compliance)
 
 적절한 경우, 컴파일 시간에 인터페이스 컴플라이언스를 검증한다. 이는 다음을 포함한다:
 - API contract의 일부로 특정 인터페이스를 구현하는데 필요한 exported 타입
@@ -373,7 +373,7 @@ func (m *SMap) Get(k string) string {
 
 </tbody></table>
 
-### 바운더리에서 슬라이스 및 맵 복사
+### 바운더리에서 슬라이스 및 맵 복사 (Copy Slices and Maps at Boundaries)
 
 슬라이스 및 맵에는 기본 데이터에 대한 포인터가 포함되어 있으므로 복사해야 하는 시나리오에 주의 할 필요가 있다.
 
@@ -475,7 +475,7 @@ snapshot := stats.Snapshot()
 </td></tr>
 </tbody></table>
 
-### Clean Up 하기 위한 Defer
+### Clean Up 하기 위한 Defer (Defer to Clean Up)
 
 defer를 사용하여 파일(files) 및 잠금(locks)과 같은 리소스를 정리한다.
 
@@ -523,7 +523,7 @@ return p.count
 `defer` 사용으로 인한 가독성 향상은 사용에 따른 소액의 비용을 지불 할 가치가 있다.
 이는 다른 계산이 `defer`보다 더 중요한, 단순한 메모리 액세스 이상의 대규모 메서드에 특히 해당한다.
 
-### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None)
+### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None) (Channel Size is One or None)
 
 채널의 크기는 일반적으로 1 이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사(scrutiny)를 받아야 한다. 어떻게 크기를 결정(determined)할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
 
@@ -549,7 +549,7 @@ c := make(chan int)
 </td></tr>
 </tbody></table>
 
-### Enums은 1에서부터 시작하라
+### Enums은 1에서부터 시작하라 (Start Enums at One)
 
 Go에서 열거형(enumerations)을 도입하는 일반적 방식(standard way)은 사용자정의형(a custom type) 그리고 `const`그룹을 `iota`와 함께 을 선언(declare)하는 것이다.
 
@@ -2075,7 +2075,7 @@ BenchmarkStrconv-4    64.2 ns/op    1 allocs/op
 </td></tr>
 </tbody></table>
 
-### string-to-byte 변환을 피해라
+### string-to-byte 변환을 피해라 (Avoid repeated string-to-byte conversions)
 
 고정 문자열(fixed string)에서 바이트 슬라이스(byte slices)를 반복해서 생성하지 마라. 대신 변환(conversion)을 한번 실행하고, 결과를 캡쳐해라.
 
