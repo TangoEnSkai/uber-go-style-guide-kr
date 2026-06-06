@@ -2229,7 +2229,9 @@ type Client struct {
 </td></tr>
 </tbody></table>
 
-### 구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)
+### 구조체 초기화 (Initializing Structs)
+
+#### 구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)
 
 구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
 
@@ -2268,6 +2270,74 @@ tests := []struct{
   {Subtract, "subtract"},
 }
 ```
+
+#### 구조체의 제로 값 필드 생략 (Omit Zero Value Fields in Structs)
+
+필드 이름으로 구조체를 초기화할 때, 의미있는 컨텍스트를 제공하지 않는 한 제로 값을 가진 필드는 생략하라. 그렇지 않으면 Go가 자동으로 해당 필드를 제로 값으로 설정하게 하라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+user := User{
+  FirstName: "John",
+  LastName: "Doe",
+  MiddleName: "",
+  Admin: false,
+}
+```
+
+</td><td>
+
+```go
+user := User{
+  FirstName: "John",
+  LastName: "Doe",
+}
+```
+
+</td></tr>
+</tbody></table>
+
+해당 컨텍스트에서 기본값인 값을 생략하면 독자에게 불필요한 노이즈를 줄여준다. 의미있는 값만 명시하라.
+
+필드 이름이 의미있는 컨텍스트를 제공하는 경우에는 제로 값을 포함하라. 예를 들어, [테스트 테이블](#테스트-테이블-test-tables)의 테스트 케이스는 제로 값이더라도 필드 이름으로부터 이점을 얻을 수 있다.
+
+```go
+tests := []struct{
+  give string
+  want int
+}{
+  {give: "0", want: 0},
+  // ...
+}
+```
+
+#### 제로 값 구조체에 `var` 사용 (Use `var` for Zero Value Structs)
+
+구조체 선언에서 모든 필드가 생략될 때는 `var` 형식으로 구조체를 선언하라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+user := User{}
+```
+
+</td><td>
+
+```go
+var user User
+```
+
+</td></tr>
+</tbody></table>
+
+이렇게 하면 제로 값 구조체와 비제로 필드를 가진 구조체를 구분할 수 있으며, [map 초기화](#map-초기화-initializing-maps)에 대해 생성된 구분과 유사하고, 빈 슬라이스 선언 방식과도 일치한다.
 
 ### 지역 변수 선언 (Local Variable Declarations)
 
@@ -2552,7 +2622,7 @@ wantError := `unknown error:"test"`
 </td></tr>
 </tbody></table>
 
-### 구조체 참조 초기화 (Initializing Struct References)
+#### 구조체 참조 초기화 (Initializing Struct References)
 
 구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 해라.
 
