@@ -1457,6 +1457,91 @@ func (l *ConcreteList) Remove(e Entity) {
 
 위임 메서드를 작성하는 것이 번거롭더라도, 추가적인 노력은 구현 세부사항을 숨기고, 변경 가능성을 더 많이 남기며, 문서에서 전체 List 인터페이스를 찾기 위한 간접 참조도 제거한다.
 
+### 내장된(built-in) 이름 사용을 피하라 (Avoid Using Built-In Names)
+
+Go [언어 명세](https://go.dev/ref/spec)에는 Go 프로그램 내에서 이름으로 사용해서는 안 되는 여러 내장 [사전 선언 식별자(predeclared identifiers)](https://go.dev/ref/spec#Predeclared_identifiers)가 나열되어 있다.
+
+문맥에 따라 이러한 식별자를 이름으로 재사용하면, 현재 어휘 범위(및 중첩된 범위) 내에서 원래 식별자를 가리거나(shadow), 영향 받는 코드를 혼란스럽게 만든다. 최선의 경우 컴파일러가 불평하고, 최악의 경우 이런 코드는 찾기 어려운 잠재적 버그를 도입할 수 있다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+var error string
+// `error` shadows the builtin
+
+// or
+
+func handleErrorMessage(error string) {
+    // `error` shadows the builtin
+}
+```
+
+</td><td>
+
+```go
+var errorMessage string
+// `error` refers to the builtin
+
+// or
+
+func handleErrorMessage(msg string) {
+    // `error` refers to the builtin
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Foo struct {
+    // While these fields technically don't
+    // constitute shadowing, grepping for
+    // `error` or `string` strings is now
+    // ambiguous.
+    error  error
+    string string
+}
+
+func (f Foo) Error() error {
+    // `error` and `f.error` are
+    // visually similar
+    return f.error
+}
+
+func (f Foo) String() string {
+    // `string` and `f.string` are
+    // visually similar
+    return f.string
+}
+```
+
+</td><td>
+
+```go
+type Foo struct {
+    // `error` and `string` strings are
+    // now unambiguous.
+    err error
+    str string
+}
+
+func (f Foo) Error() error {
+    return f.err
+}
+
+func (f Foo) String() string {
+    return f.str
+}
+```
+
+</td></tr>
+</tbody></table>
+
+사전 선언 식별자를 사용해도 컴파일러가 오류를 발생시키지 않지만, `go vet`과 같은 도구는 이러한 섀도잉 케이스를 올바르게 지적해야 한다.
+
 ### Main에서 종료하기 (Exit in Main)
 
 Go 프로그램은 즉시 종료하기 위해 [`os.Exit`](https://pkg.go.dev/os#Exit) 또는 [`log.Fatal*`](https://pkg.go.dev/log#Fatal)을 사용한다. (패닉은 프로그램을 종료하는 좋은 방법이 아니다. [패닉을 피할 것](#패닉을-피할-것-dont-panic)을 참고하라.)
