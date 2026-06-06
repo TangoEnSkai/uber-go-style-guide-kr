@@ -3103,3 +3103,23 @@ db.Connect(
 
 <!-- TODO: replace this with parameter structs and functional options, when to
 use one vs other -->
+
+## 린팅 (Linting)
+
+어떤 "공인된" 린터 집합보다 더 중요한 것은, 코드베이스 전반에 걸쳐 일관되게 린트하는 것이다.
+
+최소한 다음 린터들을 사용하는 것을 권장한다. 이 린터들은 가장 일반적인 문제를 잡아내고 불필요하게 규범적이지 않으면서도 높은 코드 품질 기준을 세우는 데 도움이 된다고 판단하기 때문이다:
+
+- [errcheck](https://github.com/kisielk/errcheck): 에러가 처리되는지 확인
+- [goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports): 코드 포맷팅 및 import 관리
+- [revive](https://github.com/mgechev/revive): 일반적인 스타일 실수 지적
+- [govet](https://pkg.go.dev/cmd/vet): 일반적인 실수에 대한 코드 분석
+- [staticcheck](https://staticcheck.dev): 다양한 정적 분석 검사 수행
+
+  > **참고**: [revive](https://github.com/mgechev/revive)는 현재 deprecated된 [golint](https://github.com/golang/lint)의 현대적이고 더 빠른 후계자이다.
+
+### 린트 실행기 (Lint Runners)
+
+Go 코드의 린트 실행기로 [golangci-lint](https://github.com/golangci/golangci-lint)를 권장한다. 주로 대규모 코드베이스에서의 성능과 여러 표준 린터를 한 번에 구성하고 사용할 수 있는 기능 때문이다. 이 저장소에는 권장 린터와 설정이 포함된 예시 [.golangci.yml](https://github.com/uber-go/guide/blob/master/.golangci.yml) 설정 파일이 있다.
+
+golangci-lint에는 사용 가능한 [다양한 린터](https://golangci-lint.run/usage/linters/)가 있다. 위에 나열된 린터들이 기본 세트로 권장되며, 각 팀이 프로젝트에 맞는 추가 린터를 더하는 것을 장려한다.
