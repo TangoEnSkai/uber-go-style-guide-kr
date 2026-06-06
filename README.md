@@ -1345,6 +1345,118 @@ func TestSigner(t *testing.T) {
 </td></tr>
 </tbody></table>
 
+### 공개 구조체(public struct)에서 내장 타입들(Embedding Types) 사용하지 않기 (Avoid Embedding Types in Public Structs)
+
+내장된 타입(embedded type)은 구현 세부사항을 노출하고, 타입 확장을 방해하며, 문서를 불명확하게 만든다.
+
+공유되는 `AbstractList`를 사용하여 다양한 리스트 타입을 구현했다고 가정할 때, 구체적인 리스트 구현체에 `AbstractList`를 내장하는 것을 피하라. 대신, 추상 리스트에 위임(delegate)하는 메서드만 직접 작성하라.
+
+```go
+type AbstractList struct {}
+
+// Add adds an entity to the list.
+func (l *AbstractList) Add(e Entity) {
+  // ...
+}
+
+// Remove removes an entity from the list.
+func (l *AbstractList) Remove(e Entity) {
+  // ...
+}
+```
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  *AbstractList
+}
+```
+
+</td><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  list *AbstractList
+}
+
+// Add adds an entity to the list.
+func (l *ConcreteList) Add(e Entity) {
+  l.list.Add(e)
+}
+
+// Remove removes an entity from the list.
+func (l *ConcreteList) Remove(e Entity) {
+  l.list.Remove(e)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+Go는 상속과 컴포지션 사이의 절충안으로 [타입 내장(type embedding)](https://go.dev/doc/effective_go#embedding)을 허용한다. 외부 타입은 내장된 타입의 메서드를 암묵적으로 복사한다. 이 메서드들은 기본적으로 내장된 인스턴스의 동일한 메서드에 위임한다.
+
+구조체는 타입과 동일한 이름의 필드도 갖게 된다. 따라서 내장된 타입이 공개(public)이면 필드도 공개된다. 하위 호환성을 유지하기 위해 외부 타입의 모든 이후 버전은 내장된 타입을 유지해야 한다.
+
+내장 타입이 필요한 경우는 드물다. 번거로운 위임 메서드 작성을 피하기 위한 편의 기능이다.
+
+호환 가능한 AbstractList *인터페이스*를 구조체 대신 내장하더라도, 개발자에게 미래에 더 많은 유연성을 제공하지만, 구체적인 리스트가 추상적 구현을 사용한다는 세부사항은 여전히 노출된다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// AbstractList is a generalized implementation
+// for various kinds of lists of entities.
+type AbstractList interface {
+  Add(Entity)
+  Remove(Entity)
+}
+
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  AbstractList
+}
+```
+
+</td><td>
+
+```go
+// ConcreteList is a list of entities.
+type ConcreteList struct {
+  list AbstractList
+}
+
+// Add adds an entity to the list.
+func (l *ConcreteList) Add(e Entity) {
+  l.list.Add(e)
+}
+
+// Remove removes an entity from the list.
+func (l *ConcreteList) Remove(e Entity) {
+  l.list.Remove(e)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+구조체를 내장하든 인터페이스를 내장하든, 내장된 타입은 해당 타입의 발전에 제약을 가한다.
+
+- 내장된 인터페이스에 메서드를 추가하는 것은 호환성을 깨뜨리는 변경이다.
+- 내장된 구조체에서 메서드를 제거하는 것은 호환성을 깨뜨리는 변경이다.
+- 내장된 타입을 제거하는 것은 호환성을 깨뜨리는 변경이다.
+- 동일한 인터페이스를 만족하는 대안으로 내장된 타입을 교체하는 것도 호환성을 깨뜨리는 변경이다.
+
+위임 메서드를 작성하는 것이 번거롭더라도, 추가적인 노력은 구현 세부사항을 숨기고, 변경 가능성을 더 많이 남기며, 문서에서 전체 List 인터페이스를 찾기 위한 간접 참조도 제거한다.
+
 ### Main에서 종료하기 (Exit in Main)
 
 Go 프로그램은 즉시 종료하기 위해 [`os.Exit`](https://pkg.go.dev/os#Exit) 또는 [`log.Fatal*`](https://pkg.go.dev/log#Fatal)을 사용한다. (패닉은 프로그램을 종료하는 좋은 방법이 아니다. [패닉을 피할 것](#패닉을-피할-것-dont-panic)을 참고하라.)
