@@ -605,6 +605,130 @@ const (
 
 <!-- TODO: section on String methods for enums -->
 
+### 시간을 처리하려면 `"time"`을 사용하라 (Use `"time"` to handle time)
+
+시간은 복잡하다. 시간에 대해 흔히 잘못 가정하는 것들은 다음과 같다.
+
+1. 하루는 24시간이다
+2. 한 시간은 60분이다
+3. 한 주는 7일이다
+4. 한 해는 365일이다
+5. [그 외 많은 것들](https://infiniteundo.com/post/25326999628/falsehoods-programmers-believe-about-time)
+
+예를 들어, *1번*은 어떤 시각에 24시간을 더한다고 해서 항상 다음 날이 되는 것은 아님을 의미한다.
+
+따라서, 시간을 다룰 때는 항상 [`"time"`](https://pkg.go.dev/time) 패키지를 사용하라. 이 패키지는 이러한 잘못된 가정들을 더 안전하고 정확하게 처리하는 데 도움을 준다.
+
+#### 시간의 순간(instants of time)을 나타내기 위해서는 `time.Time` 를 사용하라
+
+시간의 순간을 다룰 때는 [`time.Time`](https://pkg.go.dev/time#Time)을 사용하고, 시간을 비교하거나 더하거나 빼는 작업에는 `time.Time`의 메서드를 사용하라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+func isActive(now, start, stop int) bool {
+  return start <= now && now < stop
+}
+```
+
+</td><td>
+
+```go
+func isActive(now, start, stop time.Time) bool {
+  return (start.Before(now) || start.Equal(now)) && now.Before(stop)
+}
+```
+
+</td></tr>
+</tbody></table>
+
+#### 시간의 기간(periods of time)을 나타내기 위해 `time.Duration` 을 사용하라
+
+시간의 기간을 다룰 때는 [`time.Duration`](https://pkg.go.dev/time#Duration)을 사용하라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+func poll(delay int) {
+  for {
+    // ...
+    time.Sleep(time.Duration(delay) * time.Millisecond)
+  }
+}
+
+poll(10) // 초인가, 밀리초인가?
+```
+
+</td><td>
+
+```go
+func poll(delay time.Duration) {
+  for {
+    // ...
+    time.Sleep(delay)
+  }
+}
+
+poll(10*time.Second)
+```
+
+</td></tr>
+</tbody></table>
+
+어떤 시각에 24시간을 더하는 예시로 돌아가서, 시간을 더하는 방법은 의도에 따라 달라진다. 같은 시각이지만 다음 날로 이동하고 싶다면 [`Time.AddDate`](https://pkg.go.dev/time#Time.AddDate)를 사용해야 한다. 반면, 이전 시각에서 정확히 24시간 후를 보장하는 시각을 원한다면 [`Time.Add`](https://pkg.go.dev/time#Time.Add)를 사용해야 한다.
+
+```go
+newDay := t.AddDate(0 /* years */, 0 /* months */, 1 /* days */)
+maybeNewDay := t.Add(24 * time.Hour)
+```
+
+#### `time.Time` 과 `time.Duration`을 외부 시스템과 사용하기
+
+외부 시스템과 상호작용할 때 가능하다면 `time.Duration`과 `time.Time`을 사용하라. 예를 들어:
+
+- 커맨드라인 플래그: [`flag`](https://pkg.go.dev/flag)는 [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration)을 통해 `time.Duration`을 지원한다
+- JSON: [`encoding/json`](https://pkg.go.dev/encoding/json)은 [`UnmarshalJSON` 메서드](https://pkg.go.dev/time#Time.UnmarshalJSON)를 통해 `time.Time`을 [RFC 3339](https://tools.ietf.org/html/rfc3339) 문자열로 인코딩하는 것을 지원한다
+- SQL: [`database/sql`](https://pkg.go.dev/database/sql)은 드라이버가 지원하는 경우 `DATETIME` 또는 `TIMESTAMP` 컬럼을 `time.Time`으로 변환하는 것을 지원한다
+- YAML: [`gopkg.in/yaml.v2`](https://pkg.go.dev/gopkg.in/yaml.v2)는 `time.Time`을 [RFC 3339](https://tools.ietf.org/html/rfc3339) 문자열로, `time.Duration`을 [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration)을 통해 지원한다
+
+이러한 상호작용에서 `time.Duration`을 사용할 수 없는 경우, `int` 또는 `float64`를 사용하고 필드 이름에 단위를 포함시켜라.
+
+예를 들어, `encoding/json`은 `time.Duration`을 지원하지 않으므로, 단위를 필드 이름에 포함시킨다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+// {"interval": 2}
+type Config struct {
+  Interval int `json:"interval"`
+}
+```
+
+</td><td>
+
+```go
+// {"intervalMillis": 2000}
+type Config struct {
+  IntervalMillis int `json:"intervalMillis"`
+}
+```
+
+</td></tr>
+</tbody></table>
+
+이러한 상호작용에서 `time.Time`을 사용할 수 없고, 다른 방법에 합의하지 않은 경우에는 `string`을 사용하고 [RFC 3339](https://tools.ietf.org/html/rfc3339)에 정의된 형식으로 타임스탬프를 포맷하라. 이 형식은 [`Time.UnmarshalText`](https://pkg.go.dev/time#Time.UnmarshalText)에서 기본으로 사용되며, [`time.RFC3339`](https://pkg.go.dev/time#RFC3339)를 통해 `Time.Format`과 `time.Parse`에서도 사용할 수 있다.
+
+실제로는 문제가 되지 않는 경우가 많지만, `"time"` 패키지는 윤초(leap second)가 포함된 타임스탬프 파싱([8728](https://github.com/golang/go/issues/8728))을 지원하지 않으며, 계산에서도 윤초를 고려하지 않는다([15190](https://github.com/golang/go/issues/15190)). 두 시각을 비교하면 그 사이에 발생한 윤초는 차이에 포함되지 않는다.
+
 ### 에러 (Errors)
 
 #### 에러 형(Error Types)
