@@ -777,7 +777,9 @@ type Config struct {
 
 <!-- TODO: section on String methods for enums -->
 
-### 에러 형(Error Types)
+### 에러 (Errors)
+
+#### 에러 형(Error Types)
 
 에러를 선언하는데 있어서 다양한 옵션들이 존재한다:
 
@@ -936,7 +938,7 @@ if err := foo.Open("foo"); err != nil {
 
 <!-- TODO: Exposing the information to callers with accessor functions. -->
 
-### 오류 래핑(Error Wrapping)
+#### 오류 래핑(Error Wrapping)
 
 호출이 실패할 경우 에러를 전파(propagating)하기 위한 3가지 주요 옵션이 있다:
 
@@ -992,6 +994,152 @@ x: y: new store: the error
 
   [`"pkg/errors".Cause`]: https://godoc.org/github.com/pkg/errors#Cause
   [Don't just check errors, handle them gracefully]: https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
+
+#### 에러 이름 짓기 (Error Naming)
+
+전역 변수(global variables)로 저장되는 에러 값에는, 내보내기(export) 여부에 따라 `Err` 또는 `err` 접두사를 사용하라.
+이 가이드라인은 [수출되지 않은 전역에 _을 붙여라](#수출되지-않은-전역에-_을-붙여라-prefix-unexported-globals-with-_) 규칙보다 우선한다.
+
+```go
+var (
+  // 다음 두 에러는 내보내기(export)되어,
+  // 이 패키지의 사용자가 errors.Is로 매칭할 수 있다.
+
+  ErrBrokenLink = errors.New("link is broken")
+  ErrCouldNotOpen = errors.New("could not open")
+
+  // 이 에러는 내보내지 않는다(not exported).
+  // public API의 일부로 만들고 싶지 않기 때문이다.
+  // 하지만 패키지 내부에서 errors.Is로 사용할 수 있다.
+
+  errNotFound = errors.New("not found")
+)
+```
+
+커스텀 에러 타입의 경우, 대신 `Error` 접미사를 사용하라.
+
+```go
+// 마찬가지로 이 에러는 내보내기(export)되어,
+// 이 패키지의 사용자가 errors.As로 매칭할 수 있다.
+
+type NotFoundError struct {
+  File string
+}
+
+func (e *NotFoundError) Error() string {
+  return fmt.Sprintf("file %q not found", e.File)
+}
+
+// 이 에러는 내보내지 않는다(not exported).
+// public API의 일부로 만들고 싶지 않기 때문이다.
+// 하지만 패키지 내부에서 errors.As로 사용할 수 있다.
+
+type resolveError struct {
+  Path string
+}
+
+func (e *resolveError) Error() string {
+  return fmt.Sprintf("resolve %q", e.Path)
+}
+```
+
+#### 에러를 한 번만 처리하라 (Handle Errors Once)
+
+호출자(caller)가 피호출자(callee)로부터 에러를 받았을 때, 에러에 대해 알고 있는 내용에 따라 다양한 방식으로 처리할 수 있다.
+
+가능한 처리 방식은 다음과 같지만, 이에 국한되지 않는다:
+
+- 피호출자의 계약이 특정 에러를 정의한다면, `errors.Is` 또는 `errors.As`로 에러를 매칭하여 각 분기를 다르게 처리한다.
+- 에러에서 회복(recover)할 수 있다면, 에러를 로그로 남기고 우아하게(gracefully) 성능을 낮춘다.
+- 에러가 도메인 특정 실패 조건(domain-specific failure condition)을 나타낸다면, 잘 정의된 에러를 반환한다.
+- 에러를 [래핑(wrapped)](#오류-래핑error-wrapping)하거나 그대로 반환한다.
+
+호출자는 에러를 어떻게 처리하든, 일반적으로 각 에러를 **한 번만** 처리해야 한다.
+예를 들어, 에러를 로그로 남긴 후 반환하는 것은 좋지 않다. *상위 호출자*도 에러를 처리할 수 있기 때문이다.
+
+예시를 통해 살펴보자:
+
+<table>
+<thead><tr><th>설명</th><th>코드</th></tr></thead>
+<tbody>
+<tr><td>
+
+**Bad**: 에러를 로그로 남기고 반환한다
+
+스택 상위의 호출자도 에러에 대해 유사한 동작을 할 가능성이 높다.
+이렇게 하면 애플리케이션 로그에 불필요한 노이즈가 쌓인다.
+
+</td><td>
+
+```go
+u, err := getUser(id)
+if err != nil {
+  // BAD: See description
+  log.Printf("Could not get user %q: %v", id, err)
+  return err
+}
+```
+
+</td></tr>
+<tr><td>
+
+**Good**: 에러를 래핑하고 반환한다
+
+스택 상위의 호출자가 에러를 처리한다.
+`%w`를 사용하면 관련 있는 경우 `errors.Is` 또는 `errors.As`로 에러를 매칭할 수 있다.
+
+</td><td>
+
+```go
+u, err := getUser(id)
+if err != nil {
+  return fmt.Errorf("get user %q: %w", id, err)
+}
+```
+
+</td></tr>
+<tr><td>
+
+**Good**: 에러를 로그로 남기고 우아하게 성능을 낮춘다
+
+작업이 엄격히 필요하지 않다면, 에러에서 회복하여 기능이 저하되지만 정상적으로 동작하는 경험을 제공할 수 있다.
+
+</td><td>
+
+```go
+if err := emitMetrics(); err != nil {
+  // 메트릭 쓰기 실패가 애플리케이션을 중단시켜서는 안 된다.
+  log.Printf("Could not emit metrics: %v", err)
+}
+
+```
+
+</td></tr>
+<tr><td>
+
+**Good**: 에러를 매칭하고 우아하게 성능을 낮춘다
+
+피호출자가 계약에서 특정 에러를 정의하고, 실패에서 회복할 수 있다면, 해당 에러 케이스를 매칭하여 우아하게 성능을 낮춘다.
+그 외의 경우, 에러를 래핑하여 반환한다.
+
+스택 상위의 호출자가 그 외의 에러를 처리한다.
+
+</td><td>
+
+```go
+tz, err := getUserTimeZone(id)
+if err != nil {
+  if errors.Is(err, ErrUserNotFound) {
+    // 사용자가 존재하지 않는다. UTC를 사용한다.
+    tz = time.UTC
+  } else {
+    return fmt.Errorf("get user %q: %w", id, err)
+  }
+}
+```
+
+</td></tr>
+</tbody></table>
 
 ### 타입의 어설션 실패 다루기 (Handle Type Assertion Failures)
 
