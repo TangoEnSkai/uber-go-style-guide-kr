@@ -2695,7 +2695,7 @@ const (
 
 ### 구조체에서의 임베딩 (Embedding in Structs)
 
-뮤텍스와 같은 임베드된 타입은 구조체의 필드 목록 가장 상위층에 있어야 하고, 임베드 된 필드를 일반 필드와 분리하는 empty line이 있어야 한다.
+임베드된 타입은 구조체의 필드 목록 최상단에 위치해야 하며, 임베드된 필드와 일반 필드를 구분하는 빈 줄이 있어야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2716,6 +2716,124 @@ type Client struct {
   http.Client
 
   version int
+}
+```
+
+</td></tr>
+</tbody></table>
+
+임베딩은 기능을 추가하거나 의미적으로 적절한 방식으로 기능을 증강하는 등 실질적인 이점을 제공해야 한다. 사용자에게 부정적인 영향을 미쳐서는 안 된다. ([공개 구조체에서 내장 타입들 사용하지 않기](#공개-구조체public-struct에서-내장-타입들embedding-types-사용하지-않기-avoid-embedding-types-in-public-structs) 참고)
+
+예외: 뮤텍스는 비공개 타입에서도 임베드해서는 안 된다. ([제로 값 뮤텍스는 유효하다](#제로-값-뮤텍스zero-value-mutexes는-유효하다-zero-value-mutexes-are-valid) 참고)
+
+임베딩은 다음과 같은 경우에 **해서는 안 된다**:
+
+- 단순히 외관상의 이유나 편의를 위한 경우.
+- 외부 타입의 생성 또는 사용을 더 어렵게 만드는 경우.
+- 외부 타입의 제로 값에 영향을 주는 경우. 외부 타입에 유용한 제로 값이 있다면, 내부 타입을 임베드한 후에도 유용한 제로 값을 가져야 한다.
+- 내부 타입을 임베드하는 부작용으로 관련 없는 함수나 필드를 외부 타입에 노출하는 경우.
+- 비공개 타입을 노출하는 경우.
+- 외부 타입의 복사 의미론(copy semantics)에 영향을 주는 경우.
+- 외부 타입의 API나 타입 의미론을 변경하는 경우.
+- 내부 타입의 비표준 형식을 임베드하는 경우.
+- 외부 타입의 구현 세부사항을 노출하는 경우.
+- 사용자가 타입 내부를 관찰하거나 제어할 수 있게 하는 경우.
+- 래핑을 통해 내부 함수의 일반적인 동작을 변경하여 사용자를 합리적으로 놀라게 하는 경우.
+
+간단히 말해, 의식적이고 의도적으로 임베드하라. 좋은 기준은 "이 내보내진 내부 메서드/필드 전부를 외부 타입에 직접 추가할 것인가"이다. 답이 "일부" 또는 "아니오"라면 내부 타입을 임베드하지 말고 필드로 사용하라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type A struct {
+    // Bad: A.Lock() and A.Unlock() are
+    //      now available, provide no
+    //      functional benefit, and allow
+    //      users to control details about
+    //      the internals of A.
+    sync.Mutex
+}
+```
+
+</td><td>
+
+```go
+type countingWriteCloser struct {
+    // Good: Write() is provided at this
+    //       outer layer for a specific
+    //       purpose, and delegates work
+    //       to the inner type's Write().
+    io.WriteCloser
+
+    count int
+}
+
+func (w *countingWriteCloser) Write(bs []byte) (int, error) {
+    w.count += len(bs)
+    return w.WriteCloser.Write(bs)
+}
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Book struct {
+    // Bad: pointer changes zero value usefulness
+    io.ReadWriter
+
+    // other fields
+}
+
+// later
+
+var b Book
+b.Read(...)  // panic: nil pointer
+b.String()   // panic: nil pointer
+b.Write(...) // panic: nil pointer
+```
+
+</td><td>
+
+```go
+type Book struct {
+    // Good: has useful zero value
+    bytes.Buffer
+
+    // other fields
+}
+
+// later
+
+var b Book
+b.Read(...)  // ok
+b.String()   // ok
+b.Write(...) // ok
+```
+
+</td></tr>
+<tr><td>
+
+```go
+type Client struct {
+    sync.Mutex
+    sync.WaitGroup
+    bytes.Buffer
+    url.URL
+}
+```
+
+</td><td>
+
+```go
+type Client struct {
+    mtx sync.Mutex
+    wg  sync.WaitGroup
+    buf bytes.Buffer
+    url url.URL
 }
 ```
 
