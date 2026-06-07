@@ -763,28 +763,30 @@ type Config struct {
 
 #### 에러 형(Error Types)
 
-에러를 선언하는데 있어서 다양한 옵션들이 존재한다:
+에러를 선언하는 방법에는 몇 가지 옵션이 있다.
+사용 케이스에 가장 적합한 옵션을 고르기 전에 다음을 고려하라.
 
-- [`errors.New`] 간단한 정적 문자열(simple static strings)과 함께하는 에러
-- [`fmt.Errorf`] 형식화된 오류 문자열
-- `Error()` 메서드를 구현한 커스텀 타입 (Custom types)
-- [`"pkg/errors".Wrap`]를 사용하여 래핑 된(wrapped) 오류
+- 호출자가 에러를 매칭하여 처리해야 하는가?
+  그렇다면, 최상위 에러 변수나 커스텀 타입을 선언하여
+  [`errors.Is`](https://pkg.go.dev/errors#Is) 또는 [`errors.As`](https://pkg.go.dev/errors#As) 함수를 지원해야 한다.
+- 에러 메시지가 정적 문자열인가, 아니면 컨텍스트 정보가 필요한 동적 문자열인가?
+  정적 문자열이면 [`errors.New`](https://pkg.go.dev/errors#New)를 사용할 수 있고,
+  동적 문자열이면 [`fmt.Errorf`](https://pkg.go.dev/fmt#Errorf) 또는 커스텀 에러 타입을 사용해야 한다.
+- 다운스트림 함수에서 반환된 새 에러를 전파하는가?
+  그렇다면 [오류 래핑 섹션](#오류-래핑error-wrapping)을 참고하라.
 
-오류를 반환할 때, 가장 좋은 선택을 하기 위해서 아래의 사항을 고려하라:
+| 에러 매칭 필요? | 에러 메시지 | 권장 방법 |
+|---|---|---|
+| No | static | [`errors.New`](https://pkg.go.dev/errors#New) |
+| No | dynamic | [`fmt.Errorf`](https://pkg.go.dev/fmt#Errorf) |
+| Yes | static | 최상위 `var` + [`errors.New`](https://pkg.go.dev/errors#New) |
+| Yes | dynamic | 커스텀 `error` 타입 |
 
-- 추가 정보가 필요없는 간단한 에러인가? 그렇다면, [`errors.New`]가 충분하다.
-- 클라이언트가 오류를 감지하고 처리(handle)해야 하는가? 그렇다면, 커스텀 타입을 사용해야 하고 `Error()` 메서드를 구현해야 한다.
-- 다운스트림 함수(downstream function)에 의해 반환된 에러를 전파(propagating)하고 있는가? 그렇다면, [오류 포장(Error Wrapping)](#%ec%98%a4%eb%a5%98-%eb%9e%98%ed%95%91error-wrapping)을 참고하라.
-- 이외의 경우, [`fmt.Errorf`] 로 충분하다.
-
-  [`errors.New`]: https://golang.org/pkg/errors/#New
-  [`fmt.Errorf`]: https://golang.org/pkg/fmt/#Errorf
-  [`"pkg/errors".Wrap`]: https://godoc.org/github.com/pkg/errors#Wrap
-
-클라이언트가 에러를 감지해야 하고 [`errors.New`]로 간단한 에러를 생성하는 경우, 에러를 `var`로 선언하라.
+예를 들어, 정적 문자열 에러에는 [`errors.New`](https://pkg.go.dev/errors#New)를 사용하라.
+호출자가 `errors.Is`로 매칭하여 처리해야 한다면 변수로 내보내라.
 
 <table>
-<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<thead><tr><th>에러 매칭 불필요</th><th>에러 매칭 필요</th></tr></thead>
 <tbody>
 <tr><td>
 
@@ -797,14 +799,9 @@ func Open() error {
 
 // package bar
 
-func use() {
-  if err := foo.Open(); err != nil {
-    if err.Error() == "could not open" {
-      // handle
-    } else {
-      panic("unknown error")
-    }
-  }
+if err := foo.Open(); err != nil {
+  // 에러를 처리할 수 없다.
+  panic("unknown error")
 }
 ```
 
@@ -822,8 +819,8 @@ func Open() error {
 // package bar
 
 if err := foo.Open(); err != nil {
-  if err == foo.ErrCouldNotOpen {
-    // handle
+  if errors.Is(err, foo.ErrCouldNotOpen) {
+    // 에러를 처리한다.
   } else {
     panic("unknown error")
   }
@@ -833,51 +830,54 @@ if err := foo.Open(); err != nil {
 </td></tr>
 </tbody></table>
 
-클라이언트가 감지해야 할 에러에 더 많은 정보(예: 정적 문자열이 아닌 동적 정보)를 담고 싶다면 커스텀 타입을 사용해야 한다.
+동적 문자열 에러의 경우, 호출자가 매칭할 필요가 없으면 [`fmt.Errorf`](https://pkg.go.dev/fmt#Errorf)를,
+매칭이 필요하면 커스텀 `error` 타입을 사용하라.
 
 <table>
-<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<thead><tr><th>에러 매칭 불필요</th><th>에러 매칭 필요</th></tr></thead>
 <tbody>
 <tr><td>
 
 ```go
-func open(file string) error {
+// package foo
+
+func Open(file string) error {
   return fmt.Errorf("file %q not found", file)
 }
 
-func use() {
-  if err := open(); err != nil {
-    if strings.Contains(err.Error(), "not found") {
-      // handle
-    } else {
-      panic("unknown error")
-    }
-  }
+// package bar
+
+if err := foo.Open("testfile.txt"); err != nil {
+  // 에러를 처리할 수 없다.
+  panic("unknown error")
 }
 ```
 
 </td><td>
 
 ```go
-type errNotFound struct {
-  file string
+// package foo
+
+type NotFoundError struct {
+  File string
 }
 
-func (e errNotFound) Error() string {
-  return fmt.Sprintf("file %q not found", e.file)
+func (e *NotFoundError) Error() string {
+  return fmt.Sprintf("file %q not found", e.File)
 }
 
-func open(file string) error {
-  return errNotFound{file: file}
+func Open(file string) error {
+  return &NotFoundError{File: file}
 }
 
-func use() {
-  if err := open(); err != nil {
-    if _, ok := err.(errNotFound); ok {
-      // handle
-    } else {
-      panic("unknown error")
-    }
+// package bar
+
+if err := foo.Open("testfile.txt"); err != nil {
+  var notFound *NotFoundError
+  if errors.As(err, &notFound) {
+    // 에러를 처리한다.
+  } else {
+    panic("unknown error")
   }
 }
 ```
@@ -885,50 +885,36 @@ func use() {
 </td></tr>
 </tbody></table>
 
-커스텀 에러 타입을 직접 내보내는(export) 경우 주의하라. 해당 타입이 패키지의 공개 API 일부가 되기 때문이다. 대신 에러를 확인하는 매처 함수(matcher function)를 노출하는 것이 좋다.
-
-```go
-// package foo
-
-type errNotFound struct {
-  file string
-}
-
-func (e errNotFound) Error() string {
-  return fmt.Sprintf("file %q not found", e.file)
-}
-
-func IsNotFoundError(err error) bool {
-  _, ok := err.(errNotFound)
-  return ok
-}
-
-func Open(file string) error {
-  return errNotFound{file: file}
-}
-
-// package bar
-
-if err := foo.Open("foo"); err != nil {
-  if foo.IsNotFoundError(err) {
-    // handle
-  } else {
-    panic("unknown error")
-  }
-}
-```
+패키지에서 에러 변수나 타입을 내보내는 경우,
+해당 타입이 패키지의 공개 API 일부가 됨에 유의하라.
 
 <!-- TODO: Exposing the information to callers with accessor functions. -->
 
 #### 오류 래핑(Error Wrapping)
 
-호출이 실패할 경우 에러를 전파(propagating)하기 위한 3가지 주요 옵션이 있다:
+호출이 실패할 경우 에러를 전파하는 3가지 주요 옵션이 있다:
 
-- 추가적인 컨텍스트(additional context)가 없고 원래의 에러 타입을 유지하려는 경우 본래의 에러(original error)를 반환.
-- 에러 메시지가 더 많은 컨텍스트를 제공하면서 [`"pkg/errors".Cause`]가 원래 오류를 추출하는데 사용될 수 있도록 [`"pkg/errors".Wrap`]을 사용하여 컨텍스트를 추가.
-- 호출자(callers)가 특정한 에러 케이스를(specific error case)를 감지하거나 다룰(handle) 필요가 없는 경우 [`fmt.Errorf`]를 사용.
+- 추가 컨텍스트 없이 원본 에러를 그대로 반환
+- `fmt.Errorf`와 `%w` 동사로 컨텍스트 추가
+- `fmt.Errorf`와 `%v` 동사로 컨텍스트 추가
 
-가능한 경우 컨텍스트를 추가하라. 그러면 "connection refused"와 같은 모호한 에러 대신 "call service foo: connection refused"처럼 더 유용한 에러를 얻을 수 있다.
+추가 컨텍스트가 없다면 원본 에러를 그대로 반환하라.
+이렇게 하면 원본 에러 타입과 메시지가 유지된다.
+에러 메시지가 출처를 충분히 추적할 수 있는 경우에 적합하다.
+
+그렇지 않다면 가능한 경우 컨텍스트를 추가하라.
+"connection refused"와 같은 모호한 에러 대신
+"call service foo: connection refused"처럼 더 유용한 에러를 얻을 수 있다.
+
+`fmt.Errorf`로 컨텍스트를 추가할 때는 호출자가 내부 원인을 매칭·추출할 수 있어야 하는지에 따라
+`%w` 또는 `%v`를 선택하라.
+
+- 호출자가 내부 에러에 접근해야 한다면 `%w`를 사용하라.
+  대부분의 래핑된 에러에 권장하는 기본값이다.
+  단, 호출자가 이 동작에 의존하기 시작할 수 있으니,
+  래핑된 에러가 알려진 `var`나 타입인 경우에는 함수 계약(contract)의 일부로 문서화하고 테스트하라.
+- 호출자가 내부 에러를 매칭하지 못하게 하려면 `%v`를 사용하라.
+  필요 시 나중에 `%w`로 전환할 수 있다.
 
 반환된 에러에 컨텍스트를 추가할 때는 간결하게 유지하라. "failed to"와 같이 당연한 말을 반복하는 문구는 에러가 스택을 타고 올라가면서 계속 쌓이게 된다:
 
@@ -974,7 +960,7 @@ x: y: new store: the error
 
 또한 다음의 글을 참고하라: [Don't just check errors, handle them gracefully].
 
-  [`"pkg/errors".Cause`]: https://godoc.org/github.com/pkg/errors#Cause
+
   [Don't just check errors, handle them gracefully]: https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
 
 #### 에러 이름 짓기 (Error Naming)
