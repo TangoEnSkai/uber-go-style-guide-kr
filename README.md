@@ -173,12 +173,11 @@ row before the </tbody></table> line.
 
 인터페이스에 대한 포인터는 거의 필요하지 않다.
 인터페이스는 값(value)으로 전달해야 한다.
-인터페이스에 대한 기본 데이터(underlying data)는 여전히 포인터 일 수 있다.
+인터페이스의 기본 데이터(underlying data)는 여전히 포인터일 수 있다.
 
+인터페이스는 두 가지 필드로 구성된다:
 
-하나의 인터페이스는 두 가지 필드이다:
-
-1. 타입-특정 정보(type-specific information)에 대한 포인터. 이것을 "타입"으로 간주할 수 있다.
+1. 타입별 정보(type-specific information)에 대한 포인터. 이를 "타입"으로 볼 수 있다.
 2. 데이터 포인터. 저장된 데이터가 포인터일 경우 직접 저장된다. 저장된 데이터가 값이면 값에 대한 포인터가 저장된다.
 
 인터페이스 메서드가 기본 데이터(underlying data)를 수정하도록 하려면 반드시 포인터를 사용해야 한다.
@@ -409,7 +408,7 @@ func (m *SMap) Get(k string) string {
 
 #### 슬라이스와 맵 수신
 
-참조/레퍼런스(reference)를 저장하면 인수(argument)로 받은 맵이나 슬라이스를 사용자가 수정할 수 있음을 명심하자.
+참조(reference)를 저장하면 인수로 받은 맵이나 슬라이스를 호출자가 수정할 수 있음을 명심하자.
 
 <table>
 <thead><tr><th>Bad</th> <th>Good</th></tr></thead>
@@ -453,7 +452,7 @@ trips[0] = ...
 
 #### 슬라이스와 맵 반환
 
-마찬가지로 내부 상태(internal state)를 노출하는 맵 또는 슬라이스에 대한 사용자 수정에 주의하자.
+마찬가지로 내부 상태를 노출하는 맵 또는 슬라이스를 호출자가 수정할 수 있으므로 주의하자.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
