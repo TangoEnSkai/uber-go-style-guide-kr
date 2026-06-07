@@ -112,12 +112,12 @@ row before the </tbody></table> line.
 
 ## 소개 (Introduction)
 
-스타일(styles)은 코드를 관리(govern)하는 컨벤션/규칙(conventions)이다. 컨벤션은 잘 못 이해 될 수 있는데 왜냐하면 단순히 `gofmt`가 수행하는 소스 코드 포맷팅 이외의 의미도 포함하기 때문이다.
+스타일(style)은 코드를 관리하는 규칙(convention)이다. 규칙은 오해받기 쉬운데, 단순히 `gofmt`가 수행하는 소스 코드 포맷팅 이외의 의미도 포함하기 때문이다.
 
 이 가이드의 목표는 Uber에서 Go 코드를 작성할 때 해야 할 것과 하지 말아야 할 것을 자세히 설명하여, 컨벤션의 복잡성을 관리하는 것이다.
-이 컨벤션은 엔지니어가 Go언어을 생산적으로 사용할 수 있도록 하면서 코드를 관리 가능하게 유지하기 위해 존재한다.
+이 규칙은 엔지니어가 Go를 생산적으로 사용하면서도 코드를 관리 가능한 상태로 유지하기 위해 존재한다.
 
-이는 원래 [Prashant Varanasi]와 [Simon Newton]이 일부 동료들에게 Go를 사용하면서 개발속도 향상을 도모하기 위해 소개되었다. 수 년에 걸쳐 피드백을 통해 개선하고 있다.
+이는 원래 [Prashant Varanasi]와 [Simon Newton]이 동료들의 Go 개발 속도를 높이기 위해 소개했다. 수년간 피드백을 통해 꾸준히 개선되었다.
 
   [Prashant Varanasi]: https://github.com/prashantv
   [Simon Newton]: https://github.com/nomis52 
@@ -129,9 +129,9 @@ row before the </tbody></table> line.
 3. [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 
 모든 코드는 `golint` 및 `go vet`를 실행할 때 오류가 없어야 한다.
-코드 에디터를 다음와 같이 설정하기를 권장한다:
+코드 에디터를 다음과 같이 설정할 것을 권장한다:
 
-- 코드 저장시 `goimports` 실행
+- 저장 시 `goimports` 자동 실행
 - `golint` 및 `go vet`를 실행하여 오류 확인
 
 여기에서 Go 도구에 대한 편집기 지원 정보를 찾을 수 있다:
@@ -519,13 +519,13 @@ return p.count
 </td></tr>
 </tbody></table>
 
-`defer`는 오버헤드가 극히 작으며 함수 실행 시간이 대략 nanoseconds(ns) 수준임을 증명할 수 있는 경우에만 사용을 피해야 한다.
-`defer` 사용으로 인한 가독성 향상은 사용에 따른 소액의 비용을 지불 할 가치가 있다.
-이는 다른 계산이 `defer`보다 더 중요한, 단순한 메모리 액세스 이상의 대규모 메서드에 특히 해당한다.
+`defer`의 오버헤드는 극히 작으므로, 함수 실행 시간이 나노초(ns) 수준임을 증명할 수 있는 경우에만 사용을 피해야 한다.
+`defer` 사용으로 얻는 가독성 향상은 아주 작은 비용을 감수할 만한 가치가 있다.
+이는 단순한 메모리 접근 이상의 복잡한 계산이 포함된 대형 메서드에서 특히 해당한다.
 
 ### 채널의 크기(Channel Size)는 하나(One) 혹은 제로(None) (Channel Size is One or None)
 
-채널의 크기는 일반적으로 1 이거나 혹은 버퍼링 되지 않아야 한다. 기본적으로, 채널은 버퍼링되지 않으며 크기는 0이다. 0 이외의 다른 크기는 높은 수준의 철저한 검토 혹은 정밀조사(scrutiny)를 받아야 한다. 어떻게 크기를 결정(determined)할 지 고려하라. 무엇이 채널이 로드할 경우 가득 차거나 writer가 막히는(blocked) 것을 예방하는지 그리고 이러한 것이 발생할 경우 어떤 일이 일어날 지 충분히 생각해야 한다.
+채널의 크기는 보통 1이거나 버퍼링이 없어야 한다. 기본적으로 채널은 버퍼링이 없으며 크기는 0이다. 0이 아닌 크기를 사용할 때는 충분한 검토가 필요하다. 크기를 어떻게 결정했는지, 부하 상황에서 채널이 가득 차 writer가 블록되는 것을 어떻게 방지하는지, 그리고 그런 상황이 발생했을 때 어떻게 처리할지를 고려하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -551,9 +551,9 @@ c := make(chan int)
 
 ### Enums은 1에서부터 시작하라 (Start Enums at One)
 
-Go에서 열거형(enumerations)을 도입하는 일반적 방식(standard way)은 사용자정의형(a custom type) 그리고 `const`그룹을 `iota`와 함께 을 선언(declare)하는 것이다.
+Go에서 열거형(enumeration)을 정의하는 일반적인 방법은 커스텀 타입(custom type)과 `iota`를 사용한 `const` 그룹을 선언하는 것이다.
 
-변수의 기본값(default value)는 0이기 때문에, 여러분들은 일반적으로 열거형을 0이 아닌 값(non-zero value)로 시작해야 한다.
+변수의 기본값이 0이므로, 일반적으로 열거형은 0이 아닌 값으로 시작하는 것이 좋다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -589,7 +589,7 @@ const (
 </td></tr>
 </tbody></table>
 
-제로 값(zero value)를 사용하는 것이 적절할 때도 있다. 예를 들면, 제로 값이 0인 경우 바람직한 기본 동작(default behaviour)이다.
+제로 값(zero value)을 사용하는 것이 적절한 경우도 있다. 예를 들어, 0이 기본 동작으로 적합한 경우다.
 
 ```go
 type LogOutput int
@@ -751,7 +751,7 @@ type Config struct {
   [`fmt.Errorf`]: https://golang.org/pkg/fmt/#Errorf
   [`"pkg/errors".Wrap`]: https://godoc.org/github.com/pkg/errors#Wrap
 
-만약 클라이언트가 오류를 감지해야 하고, 여러분들이 [`errors.New`]을 사용하여 간단한 에러를 생성한 경우, `var`에 에러를 사용해라.
+클라이언트가 에러를 감지해야 하고 [`errors.New`]로 간단한 에러를 생성하는 경우, 에러를 `var`로 선언하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -803,7 +803,7 @@ if err := foo.Open(); err != nil {
 </td></tr>
 </tbody></table>
 
-만약 클라이언트가 감지해야 할 오류가 있고 여러분들이 이를 추가하려고 하는 경우, 그것에 대한 자세한 정보를 추가하고 싶을 것이다. (예를들어, 정적 문자열이 아닌 경우), 이러할 경우, 여러분들은 커스텀 타입을 사용해야 한다.
+클라이언트가 감지해야 할 에러에 더 많은 정보(예: 정적 문자열이 아닌 동적 정보)를 담고 싶다면 커스텀 타입을 사용해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -855,7 +855,7 @@ func use() {
 </td></tr>
 </tbody></table>
 
-사용자 정의 오류 타입(custom error types)을 직접적으로 내보내는(exporting) 경우 주의해야 한다. 왜냐하면 그들은 패키지의 공용 API (the public API of the package)의 일부가 되기 때문이다. 대신에, 오류를 확인하기 위해서 매처 함수(matcher functions)를 노출하는 것이 좋다(preferable).
+커스텀 에러 타입을 직접 내보내는(export) 경우 주의하라. 해당 타입이 패키지의 공개 API 일부가 되기 때문이다. 대신 에러를 확인하는 매처 함수(matcher function)를 노출하는 것이 좋다.
 
 ```go
 // package foo
@@ -898,9 +898,9 @@ if err := foo.Open("foo"); err != nil {
 - 에러 메시지가 더 많은 컨텍스트를 제공하면서 [`"pkg/errors".Cause`]가 원래 오류를 추출하는데 사용될 수 있도록 [`"pkg/errors".Wrap`]을 사용하여 컨텍스트를 추가.
 - 호출자(callers)가 특정한 에러 케이스를(specific error case)를 감지하거나 다룰(handle) 필요가 없는 경우 [`fmt.Errorf`]를 사용.
 
-"connection refused"와 같은 모호한 오류보다, 컨텍스트를 추가하는 것을 추천한다. 따라서 여러분들은 "call service foo: connection refused."와 같이 더욱 유용한 에러를 얻을 수 있을 것이다.
+가능한 경우 컨텍스트를 추가하라. 그러면 "connection refused"와 같은 모호한 에러 대신 "call service foo: connection refused"처럼 더 유용한 에러를 얻을 수 있다.
 
-반환된 오류에서 컨텍스트를 추가 할 때, "failed to"와 같은 사족의 명백한 문구를 피하며 컨텍스트를 간결하게 유지하도록 해라. 이러한 문구들이 에러가 스택에 퍼지면서/스며들면서(percolates) 계속해서 쌓이게 된다:
+반환된 에러에 컨텍스트를 추가할 때는 간결하게 유지하라. "failed to"와 같이 당연한 말을 반복하는 문구는 에러가 스택을 타고 올라가면서 계속 쌓이게 된다:
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2303,7 +2303,7 @@ type (
 </td></tr>
 </tbody></table>
 
-오직 관련된 선언만 그룹화 할 것. 관련되지 않은 선언들에 대해서는 그룹화 하지 말것.
+관련된 선언만 그룹화하라. 관련 없는 선언은 별도로 선언하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2338,7 +2338,7 @@ const ENV_VAR = "MY_ENV"
 </td></tr>
 </tbody></table>
 
-그룹화를 사용하는 장소는 제한되어 있지 않다. 예를 들어, 함수 내에서도 그룹화를 사용할 수 있다.
+그룹화는 최상위 레벨에서만 사용하는 것이 아니다. 예를 들어, 함수 내에서도 사용할 수 있다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2451,8 +2451,8 @@ import (
 패키지 이름을 정할 때, 아래와 같은 이름을 선택하라:
 
 - 모두 알파벳 소문자 사용, 대문자와 언더스코어 (_)는 사용하지 말 것.
-- 대부분의 호출 지점(call sites)에서 named import를 사용하여 재명명(renamed)을 할 필요가 없다.
-- 짧고 간결하게. 이름(name)은 모든 호출 지점(call site)에서 식별됨을 상기하라.
+- 대부분의 호출 지점에서 named import로 이름을 바꿀 필요가 없다.
+- 짧고 간결하게. 이름은 모든 호출 지점에서 사용됨을 기억하라.
 - 복수형(plural) 사용 금지. 예를 들어, `net/urls` 가 아닌 `net/url`.
 - "common", "util", "shared", 또는 "lib"의 용어 사용 금지. 정보가 없는 좋지 못한 이름임.
 
@@ -2514,8 +2514,8 @@ import (
 
 ### 함수 그룹화와 정렬/배치 (Function Grouping and Ordering)
 
-- 함수는 대략적 호출 순서에 의해서 정렬되어야 한다.
-- 파일내에서의 함수는 리시버에 의해서 그룹지어져야 한다.
+- 함수는 대략적인 호출 순서에 따라 정렬해야 한다.
+- 파일 내의 함수는 리시버별로 그룹화되어야 한다.
 
 그러므로, 수출되는 함수 (exported function)는 파일 내의 `struct`, `const`, `var`의 정의 구문 이후의 시작 부분에 나타나야 한다.
 
@@ -2642,7 +2642,7 @@ if b {
 
 ### 최상위 변수 선언 (Top-level Variable Declarations)
 
-최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식(expression)r과같은 같은 타입이 아닌 이상, 타입을 특정짓지 말라.
+최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식과 타입이 다를 경우에만 타입을 명시하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3286,7 +3286,7 @@ printInfo("foo", true /* isLocal */, true /* done */)
 </td></tr>
 </tbody></table>
 
-더 나은 방법은, naked `bool` 타입을 더 읽기 쉽고 타입-안정적(type-safe)인 코드를 위해서 사용자 정의 타입(custom type)으로 대체해라. 이를 통해서 향후 해당 매개변수에 대해서 두개 이상의 상태 (true/false)를 허용할 수 있다.
+더 나은 방법은, naked `bool` 타입을 가독성과 타입 안전성을 위해 커스텀 타입으로 교체하는 것이다. 이렇게 하면 나중에 두 가지 상태(true/false) 이상으로 확장할 수 있다.
 
 ```go
 type Region int
@@ -3309,7 +3309,7 @@ func printInfo(name string, region Region, status Status)
 
 ### 이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)
 
-Go는 [raw string literals](https://golang.org/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸쳐친 코드와 따옴표를 함께 포함할 수 있다. 읽기 어려운 hand-escaped strings를 피하기 위해서 원시 문자 리터럴을 사용해라.
+Go는 [raw string literals](https://golang.org/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸친 코드와 따옴표를 포함할 수 있다. 이스케이프 처리가 많아 읽기 어려운 문자열을 피하기 위해 원시 문자 리터럴을 사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3431,11 +3431,11 @@ fmt.Printf(msg, 1, 2)
 
 `Printf`-스타일의 함수를 선언할 때, `go vet`이 이를 감지하고 형식 문자열 (format string)을 체크 할 수 있는지 확인해라.
 
-이것은 미리 정의 된 `Printf`-스타일 함수를 사용해야 한다는 것을 의미한다. `go vet`이 이를 디폴트로 체크한다. 자세한 정보는 다음을 참조하기 바란다: [Printf family]
+이것은 미리 정의된 `Printf` 스타일 함수를 사용해야 한다는 뜻이다. `go vet`이 기본적으로 이를 검사한다. 자세한 정보는 다음을 참조하기 바란다: [Printf family]
 
   [Printf family]: https://golang.org/cmd/vet/#hdr-Printf_family
 
-미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름을 f로 끝내도록 해라: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
+미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름은 `f`로 끝내야 한다: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
 
 ```shell
 $ go vet -printfuncs=wrapf,statusf
@@ -3449,7 +3449,7 @@ $ go vet -printfuncs=wrapf,statusf
 
 ### 테스트 테이블 (Test Tables)
 
-핵심적 테스트 로직(the core test logic)이 반복적일 때, 코드 중복을 피하려면 [subtests]와 함께 table-driven tests를 사용해라.
+핵심 테스트 로직이 반복될 때는 [subtests]를 활용한 테이블 기반 테스트(table-driven test)를 사용하라.
 
   [subtests]: https://blog.golang.org/subtests
 
@@ -3529,7 +3529,7 @@ for _, tt := range tests {
 
 테스트 테이블을 사용하면 에러 메시지에 컨텍스트를 쉽게 추가하고, 중복된 로직을 줄일 수 있으며, 쉽게 새로운 테스트 케이스를 추가할 수 있다.
 
-우리는 구조체 슬라이스를 `tests`라고 하고, 각 테스트 케이스를 `tt`라고 한다. 또한 각 테스트 케이스의 입력 및 출력 값을 `give` 및 `want` 접두어를 사용하여 설명(explicating)하는 것을 권장한다.
+우리는 구조체 슬라이스를 `tests`라고 하고, 각 테스트 케이스를 `tt`라고 한다. 또한 각 테스트 케이스의 입력과 출력을 `give`와 `want` 접두어로 명시하는 것을 권장한다.
 
 ```go
 tests := []struct{
