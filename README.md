@@ -3645,9 +3645,9 @@ for _, tt := range tests {
 
 ### 기능적 옵션 (Functional Options)
 
-기능적 옵션(functional options)은 일부 내부 구조체 (internal struct)에 정보를 기록하는 불투명한 `Option` 타입 (opaque option type)을 선언하는 패턴이다. 여러분들은 다양한 옵션 (variadic number of these options)을 받아들이고 내부 구조체의 옵션에 의해 기록된 모든 정보에 따라 행동하게 된다(act opon the full info. recorded by the options on the internal struct).
+기능적 옵션(functional options)은 일부 내부 구조체(internal struct)에 정보를 기록하는 불투명한 `Option` 타입을 선언하는 패턴이다. 가변 개수의 옵션을 받아 내부 구조체에 기록된 전체 정보를 바탕으로 동작한다.
 
-확장 할 필요가 있는 생성자(constructors) 및 기타 공용 API (other public APIs)의 선택적 인수 (optional arguments), 특히나 해당하는 함수에 이미 3개 이상의 인수가 있는 경우에 이 패턴을 사용하기를 권장한다.
+확장이 필요한 생성자(constructor) 및 기타 공개 API의 선택적 인수에 이 패턴을 사용하라. 특히 해당 함수에 이미 3개 이상의 인수가 있는 경우에 적합하다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3657,62 +3657,113 @@ for _, tt := range tests {
 ```go
 // package db
 
-func Connect(
+func Open(
   addr string,
-  timeout time.Duration,
-  caching bool,
+  cache bool,
+  logger *zap.Logger
 ) (*Connection, error) {
   // ...
 }
-
-// Timeout and caching must always be provided,
-// even if the user wants to use the default.
-
-db.Connect(addr, db.DefaultTimeout, db.DefaultCaching)
-db.Connect(addr, newTimeout, db.DefaultCaching)
-db.Connect(addr, db.DefaultTimeout, false /* caching */)
-db.Connect(addr, newTimeout, false /* caching */)
 ```
 
 </td><td>
 
 ```go
-type options struct {
-  timeout time.Duration
-  caching bool
+// package db
+
+type Option interface {
+  // ...
 }
 
-// Option overrides behavior of Connect.
+func WithCache(c bool) Option {
+  // ...
+}
+
+func WithLogger(log *zap.Logger) Option {
+  // ...
+}
+
+// Open creates a connection.
+func Open(
+  addr string,
+  opts ...Option,
+) (*Connection, error) {
+  // ...
+}
+```
+
+</td></tr>
+<tr><td>
+
+cache와 logger 파라미터는 기본값을 사용하고 싶어도 항상 제공해야 한다.
+
+```go
+db.Open(addr, db.DefaultCache, zap.NewNop())
+db.Open(addr, db.DefaultCache, log)
+db.Open(addr, false /* cache */, zap.NewNop())
+db.Open(addr, false /* cache */, log)
+```
+
+</td><td>
+
+옵션은 필요할 때만 제공한다.
+
+```go
+db.Open(addr)
+db.Open(addr, db.WithLogger(log))
+db.Open(addr, db.WithCache(false))
+db.Open(
+  addr,
+  db.WithCache(false),
+  db.WithLogger(log),
+)
+```
+
+</td></tr>
+</tbody></table>
+
+이 패턴을 구현하는 권장 방법은 비공개 메서드를 가진 `Option` 인터페이스를 사용하여 비공개 `options` 구조체에 옵션을 기록하는 것이다.
+
+```go
+type options struct {
+  cache  bool
+  logger *zap.Logger
+}
+
 type Option interface {
   apply(*options)
 }
 
-type optionFunc func(*options)
+type cacheOption bool
 
-func (f optionFunc) apply(o *options) {
-  f(o)
+func (c cacheOption) apply(opts *options) {
+  opts.cache = bool(c)
 }
 
-func WithTimeout(t time.Duration) Option {
-  return optionFunc(func(o *options) {
-    o.timeout = t
-  })
+func WithCache(c bool) Option {
+  return cacheOption(c)
 }
 
-func WithCaching(cache bool) Option {
-  return optionFunc(func(o *options) {
-    o.caching = cache
-  })
+type loggerOption struct {
+  Log *zap.Logger
 }
 
-// Connect creates a connection.
-func Connect(
+func (l loggerOption) apply(opts *options) {
+  opts.logger = l.Log
+}
+
+func WithLogger(log *zap.Logger) Option {
+  return loggerOption{Log: log}
+}
+
+// Open creates a connection.
+func Open(
   addr string,
   opts ...Option,
 ) (*Connection, error) {
   options := options{
-    timeout: defaultTimeout,
-    caching: defaultCaching,
+    cache:  defaultCache,
+    logger: zap.NewNop(),
   }
 
   for _, o := range opts {
@@ -3721,29 +3772,14 @@ func Connect(
 
   // ...
 }
-
-// Options must be provided only if needed.
-
-db.Connect(addr)
-db.Connect(addr, db.WithTimeout(newTimeout))
-db.Connect(addr, db.WithCaching(false))
-db.Connect(
-  addr,
-  db.WithCaching(false),
-  db.WithTimeout(newTimeout),
-)
 ```
 
-</td></tr>
-</tbody></table>
+클로저(closure)를 사용해 이 패턴을 구현하는 방법도 있지만, 위의 struct 기반 패턴이 작성자에게 더 많은 유연성을 제공하고 사용자가 디버깅 및 테스트하기 더 쉽다고 판단한다. 특히 테스트와 mock에서 옵션끼리 비교가 가능하지만 클로저에서는 불가능하다. 또한 옵션이 `fmt.Stringer`를 포함한 다른 인터페이스를 구현할 수 있어 사용자가 읽을 수 있는 문자열 표현을 제공할 수 있다.
 
-또한, 아래의 자료를 참고하기 바란다:
+아래의 자료도 참고하기 바란다:
 
-- [Self-referential functions and the design of options]
-- [Functional options for friendly APIs]
-
-  [Self-referential functions and the design of options]: https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html
-  [Functional options for friendly APIs]: https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
+- [Self-referential functions and the design of options](https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html)
+- [Functional options for friendly APIs](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis)
 
 <!-- TODO: replace this with parameter structs and functional options, when to
 use one vs other -->
