@@ -3127,7 +3127,7 @@ func f(list []int) {
 
 ### 변수의 범위를 줄여라 (Reduce Scope of Variables)
 
-가능한 변수의 범위를 줄여라. 만약 [Reduce Nesting](#reduce-nesting)과의 충돌하는 경우 범위를 줄이면 안된다.
+가능한 변수의 범위를 줄여라. 만약 [중첩 감소](#중첩-감소-reduce-nesting)와 충돌하는 경우 범위를 줄이면 안된다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3135,7 +3135,7 @@ func f(list []int) {
 <tr><td>
 
 ```go
-err := ioutil.WriteFile(name, data, 0644)
+err := os.WriteFile(name, data, 0644)
 if err != nil {
  return err
 }
@@ -3144,7 +3144,7 @@ if err != nil {
 </td><td>
 
 ```go
-if err := ioutil.WriteFile(name, data, 0644); err != nil {
+if err := os.WriteFile(name, data, 0644); err != nil {
  return err
 }
 ```
@@ -3160,7 +3160,7 @@ if err := ioutil.WriteFile(name, data, 0644); err != nil {
 <tr><td>
 
 ```go
-if data, err := ioutil.ReadFile(name); err == nil {
+if data, err := os.ReadFile(name); err == nil {
   err = cfg.Decode(data)
   if err != nil {
     return err
@@ -3176,7 +3176,7 @@ if data, err := ioutil.ReadFile(name); err == nil {
 </td><td>
 
 ```go
-data, err := ioutil.ReadFile(name)
+data, err := os.ReadFile(name)
 if err != nil {
    return err
 }
@@ -3187,6 +3187,39 @@ if err := cfg.Decode(data); err != nil {
 
 fmt.Println(cfg)
 return nil
+```
+
+</td></tr>
+</tbody></table>
+
+이 원칙은 변수뿐만 아니라 상수에도 적용된다.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+const (
+  _defaultPort = 8080
+  _defaultUser = "user"
+)
+
+func Bar() {
+  fmt.Println("Default port", _defaultPort)
+}
+```
+
+</td><td>
+
+```go
+func Bar() {
+  const (
+    defaultPort = 8080
+    defaultUser = "user"
+  )
+  fmt.Println("Default port", defaultPort)
+}
 ```
 
 </td></tr>
