@@ -1,0 +1,70 @@
+name: 원본 업데이트 감지 (Check Upstream)
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # 매주 월요일 오전 9시 (UTC)
+  workflow_dispatch:       # 수동 실행 가능
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 리포 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 원본 CHANGELOG 가져오기
+        id: upstream
+        run: |
+          curl -s https://raw.githubusercontent.com/uber-go/guide/master/CHANGELOG.md \
+            -o /tmp/upstream_changelog.md
+          LATEST=$(grep -m1 '^# ' /tmp/upstream_changelog.md | sed 's/# //')
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+          echo "원본 최신 날짜: $LATEST"
+
+      - name: 번역 리포 기준 날짜 확인
+        id: translation
+        run: |
+          CURRENT=$(grep -m1 '원문 기준:' CHANGELOG.md | grep -oP '\d{4}-\d{2}-\d{2}' | head -1 || echo "unknown")
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+          echo "번역 기준 날짜: $CURRENT"
+
+      - name: 차이 비교 및 이슈 생성
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST="${{ steps.upstream.outputs.latest }}"
+          CURRENT="${{ steps.translation.outputs.current }}"
+
+          echo "원본 최신: $LATEST / 번역 기준: $CURRENT"
+
+          # 날짜 비교 (원본이 더 최신이면 이슈 생성)
+          if [ "$LATEST" \> "$CURRENT" ]; then
+            # 이미 동일 제목의 이슈가 있는지 확인
+            EXISTING=$(gh issue list --label "upstream-update" --state open --json title --jq ".[].title" | grep "$LATEST" || true)
+            if [ -z "$EXISTING" ]; then
+              CHANGES=$(sed -n "/^# $LATEST/,/^# /p" /tmp/upstream_changelog.md | grep '^-' | head -20)
+              gh issue create \
+                --title "[원본 업데이트] uber-go/guide $LATEST 변경 사항 번역 필요" \
+                --label "documentation,upstream-update" \
+                --body "## 원본 업데이트 감지
+
+원본 [uber-go/guide](https://github.com/uber-go/guide) 리포지토리가 **$LATEST** 에 업데이트되었습니다.
+현재 번역 기준: **$CURRENT**
+
+## 변경 사항
+
+$CHANGES
+
+## 참고 링크
+- [원본 CHANGELOG](https://github.com/uber-go/guide/blob/master/CHANGELOG.md)
+- [원본 style.md](https://github.com/uber-go/guide/blob/master/style.md)
+
+---
+*이 이슈는 GitHub Actions에 의해 자동 생성되었습니다.*"
+              echo "✅ 이슈 생성 완료"
+            else
+              echo "ℹ️ 이미 동일 이슈가 존재합니다"
+            fi
+          else
+            echo "✅ 번역이 최신 상태입니다"
+          fi
