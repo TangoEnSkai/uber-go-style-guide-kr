@@ -1229,8 +1229,8 @@ if err != nil {
 
 [go.uber.org/atomic]는 기본 타입(underlying type)을 숨겨서 이런 유형의 연산에 타입 안전성을 부여한다(add type safety). 또한, 이는 간편한 `atomic.Bool` 타입을 포함하고 있다.
 
-  [go.uber.org/atomic]: https://godoc.org/go.uber.org/atomic
-  [sync/atomic]: https://golang.org/pkg/sync/atomic/
+  [go.uber.org/atomic]: https://pkg.go.dev/go.uber.org/atomic
+  [sync/atomic]: https://pkg.go.dev/sync/atomic
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2897,7 +2897,7 @@ type Client struct {
 
 구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
 
-  [`go vet`]: https://golang.org/cmd/vet/
+  [`go vet`]: https://pkg.go.dev/cmd/vet
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3449,7 +3449,7 @@ fmt.Printf(msg, 1, 2)
 
 이것은 미리 정의된 `Printf` 스타일 함수를 사용해야 한다는 뜻이다. `go vet`이 기본적으로 이를 검사한다. 자세한 정보는 다음을 참조하기 바란다: [Printf family]
 
-  [Printf family]: https://golang.org/cmd/vet/#hdr-Printf_family
+  [Printf family]: https://pkg.go.dev/cmd/vet#hdr-Printf_family
 
 미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름은 `f`로 끝내야 한다: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
 
