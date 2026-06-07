@@ -321,7 +321,7 @@ mu.Lock()
 
 ```go
 type smap struct {
-  sync.Mutex // 오직 수출되지 않은 타입을 위해서 사용
+  sync.Mutex // 오직 비공개(unexported) 타입에서만 사용
 
   data map[string]string
 }
@@ -2683,11 +2683,11 @@ var _e error = F()
 
 ### 수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)
 
-수출되지 않은 최상위(top-level) `var`와 `const`에 접두사 `_`를 붙임으로써 그들이 사용될 때, 전역 기호(global symbols)임을 명확하게 해라.
+비공개(unexported) 최상위 `var`와 `const`에 접두사 `_`를 붙여 전역 심볼(global symbol)임을 명확히 하라.
 
-예외: 수출되지 않는 에러 값 (Unexported error values)은 `err`의 접두사를 가져야 한다.
+예외: 비공개 에러 값(unexported error values)은 `err` 접두사를 사용해야 한다.
 
-이유: 최상위 변수 및 상수 (Top-level variables and constants)는 패키지 범위(package scope)를 가진다. 제네릭 이름(generic names)을 사용 하는 것은 다른 파일에서 잘못된 값을 실수로 쉽게 사용 할 수 있다.
+이유: 최상위 변수와 상수는 패키지 스코프(package scope)를 가진다. 일반적인 이름을 사용하면 다른 파일에서 잘못된 값을 실수로 사용하기 쉽다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
