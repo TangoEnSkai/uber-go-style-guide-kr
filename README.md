@@ -2340,7 +2340,7 @@ const (
   Add Operation = iota + 1
   Subtract
   Multiply
-  ENV_VAR = "MY_ENV"
+  EnvVar = "MY_ENV"
 )
 ```
 
@@ -2355,7 +2355,7 @@ const (
   Multiply
 )
 
-const ENV_VAR = "MY_ENV"
+const EnvVar = "MY_ENV"
 ```
 
 </td></tr>
@@ -2370,11 +2370,11 @@ const ENV_VAR = "MY_ENV"
 
 ```go
 func f() string {
-  var red = color.New(0xff0000)
-  var green = color.New(0x00ff00)
-  var blue = color.New(0x0000ff)
+  red := color.New(0xff0000)
+  green := color.New(0x00ff00)
+  blue := color.New(0x0000ff)
 
-  ...
+  // ...
 }
 ```
 
@@ -2388,7 +2388,7 @@ func f() string {
     blue  = color.New(0x0000ff)
   )
 
-  ...
+  // ...
 }
 ```
 
@@ -2529,6 +2529,7 @@ import (
   "runtime/trace"
 
   nettrace "golang.net/x/trace"
+  runtimetrace "runtime/trace"
 )
 ```
 
@@ -3322,7 +3323,7 @@ const (
 type Status int
 
 const (
-  StatusReady = iota + 1
+  StatusReady Status = iota + 1
   StatusDone
   // 향후에 StatusInProgress를 추가할 수 있다.
 )
