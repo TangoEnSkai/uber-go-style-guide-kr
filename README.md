@@ -275,12 +275,10 @@ sVals := map[int]S{1: {"A"}}
 
 // 값 리시버인 Read는 주소 지정이 필요 없으므로
 // 맵에 저장된 값에서도 호출할 수 있다.
-// 
 sVals[1].Read()
 
 // 포인터 리시버인 Write는 맵에 저장된 값의
 // 포인터를 얻을 수 없으므로 호출 불가능하다.
-// 
 //
 //  sVals[1].Write("test")
 
@@ -1516,7 +1514,6 @@ type Foo struct {
     // 이 필드들은 엄밀히 섀도잉은 아니지만,
     // error나 string을 grep하면
     // 결과가 모호해진다.
-    // 
     error  error
     string string
 }
@@ -2812,7 +2809,6 @@ type A struct {
     //      외부에 노출되어 실익은 없고
     //      사용자가 A 내부를
     //      직접 제어할 수 있게 된다.
-    //      
     sync.Mutex
 }
 ```
@@ -3462,7 +3458,7 @@ fmt.Printf(msg, 1, 2)
 미리 정의된 이름(pre-defined names)을 사용하는 것이 옵션이 아니라면, 선택한 이름은 `f`로 끝내야 한다: `Wrap`이 아닌 `Wrapf`. `go vet`은 특정 `Printf`-스타일의 이름을 확인하도록 요청받을 수 있으나 이들의 이름은 모두 `f`로 끝나야만 한다.
 
 ```shell
-$ go vet -printfuncs=wrapf,statusf
+go vet -printfuncs=wrapf,statusf
 ```
 
 또한 다음을 참고해라: [go vet: Printf family check].
