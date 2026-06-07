@@ -2373,6 +2373,42 @@ func f() string {
 </td></tr>
 </tbody></table>
 
+예외: 함수 내부에서 변수 선언은, 인접한 다른 변수들과 함께 선언되는 경우 묶어서 그룹화해야 한다. 서로 관련이 없더라도 함께 선언된 변수라면 이렇게 하라.
+
+<table>
+<thead><tr><th>Bad</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+func (c *client) request() {
+  caller := c.name
+  format := "json"
+  timeout := 5*time.Second
+  var err error
+
+  // ...
+}
+```
+
+</td><td>
+
+```go
+func (c *client) request() {
+  var (
+    caller  = c.name
+    format  = "json"
+    timeout = 5*time.Second
+    err error
+  )
+
+  // ...
+}
+```
+
+</td></tr>
+</tbody></table>
+
 ### Import 그룹 정리/배치 (Import Group Ordering)
 
 2가지 import 그룹들이 존재한다:
