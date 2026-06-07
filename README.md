@@ -2026,12 +2026,11 @@ worker가 여러 goroutine을 관리한다면 `WaitGroup`을 사용해야 함에
 
 ## 성능(Performance)
 
-성능-특정의(performance-specific)가이드라인은 성능에 민감한(hot path) 경우에만 적용된다.
+성능 관련 가이드라인은 성능이 중요한 경로(hot path)에서만 적용된다.
 
 ### `fmt` 보다 `strconv` 선호
 
-프리미티브(primitives)를 문자열로 / 문자열에서 변환 할 때, `strconv`가 `fmt`보다 빠르다.
-`fmt`.
+원시 타입(primitive)을 문자열로 변환하거나 문자열에서 변환할 때, `strconv`가 `fmt`보다 빠르다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2070,7 +2069,7 @@ BenchmarkStrconv-4    64.2 ns/op    1 allocs/op
 
 ### string-to-byte 변환을 피해라 (Avoid repeated string-to-byte conversions)
 
-고정 문자열(fixed string)에서 바이트 슬라이스(byte slices)를 반복해서 생성하지 마라. 대신 변환(conversion)을 한번 실행하고, 결과를 캡쳐해라.
+고정 문자열에서 바이트 슬라이스를 반복해서 생성하지 마라. 대신 변환을 한 번만 수행하고 결과를 저장해서 재사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
