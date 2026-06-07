@@ -269,25 +269,25 @@ func (s *S) Write(str string) {
   s.data = str
 }
 
-// We cannot get pointers to values stored in maps, because they are not
-// addressable values.
+// 맵에 저장된 값의 포인터는 얻을 수 없다. 주소 지정이
+// 불가능한 값이기 때문이다.
 sVals := map[int]S{1: {"A"}}
 
-// We can call Read on values stored in the map because Read
-// has a value receiver, which does not require the value to
-// be addressable.
+// 값 리시버인 Read는 주소 지정이 필요 없으므로
+// 맵에 저장된 값에서도 호출할 수 있다.
+// 
 sVals[1].Read()
 
-// We cannot call Write on values stored in the map because Write
-// has a pointer receiver, and it's not possible to get a pointer
-// to a value stored in a map.
+// 포인터 리시버인 Write는 맵에 저장된 값의
+// 포인터를 얻을 수 없으므로 호출 불가능하다.
+// 
 //
 //  sVals[1].Write("test")
 
 sPtrs := map[int]*S{1: {"A"}}
 
-// You can call both Read and Write if the map stores pointers,
-// because pointers are intrinsically addressable.
+// 포인터를 저장하는 맵은 포인터 자체가 주소 지정 가능하므로
+// Read와 Write 모두 호출할 수 있다.
 sPtrs[1].Read()
 sPtrs[1].Write("test")
 ```
@@ -432,7 +432,7 @@ func (d *Driver) SetTrips(trips []Trip) {
 trips := ...
 d1.SetTrips(trips)
 
-// Did you mean to modify d1.trips?
+// d1.trips를 수정하려 했던 것인가?
 trips[0] = ...
 ```
 
@@ -473,7 +473,7 @@ type Stats struct {
   counters map[string]int
 }
 
-// Snapshot returns the current stats.
+// Snapshot은 현재 통계를 반환한다.
 func (s *Stats) Snapshot() map[string]int {
   s.mu.Lock()
   defer s.mu.Unlock()
@@ -481,8 +481,8 @@ func (s *Stats) Snapshot() map[string]int {
   return s.counters
 }
 
-// snapshot is no longer protected by the mutex, so any
-// access to the snapshot is subject to data races.
+// snapshot은 더 이상 mutex로 보호되지 않으므로
+// 접근 시 데이터 경합이 발생할 수 있다.
 snapshot := stats.Snapshot()
 ```
 
@@ -505,7 +505,7 @@ func (s *Stats) Snapshot() map[string]int {
   return result
 }
 
-// Snapshot is now a copy.
+// Snapshot은 이제 복사본이다.
 snapshot := stats.Snapshot()
 ```
 
@@ -534,7 +534,7 @@ p.Unlock()
 
 return newCount
 
-// easy to miss unlocks due to multiple returns
+// 여러 return으로 인해 unlock을 놓치기 쉽다
 ```
 
 </td><td>
@@ -550,7 +550,7 @@ if p.count < 10 {
 p.count++
 return p.count
 
-// more readable
+// 더 읽기 좋다
 ```
 
 </td></tr>
@@ -1049,7 +1049,7 @@ func (e *resolveError) Error() string {
 ```go
 u, err := getUser(id)
 if err != nil {
-  // BAD: See description
+  // 나쁜 예: 위 설명 참고
   log.Printf("Could not get user %q: %v", id, err)
   return err
 }
@@ -1136,7 +1136,7 @@ t := i.(string)
 ```go
 t, ok := i.(string)
 if !ok {
-  // handle the error gracefully
+  // 에러를 적절히 처리한다
 }
 ```
 
@@ -1513,23 +1513,23 @@ func handleErrorMessage(msg string) {
 
 ```go
 type Foo struct {
-    // While these fields technically don't
-    // constitute shadowing, grepping for
-    // `error` or `string` strings is now
-    // ambiguous.
+    // 이 필드들은 엄밀히 섀도잉은 아니지만,
+    // error나 string을 grep하면
+    // 결과가 모호해진다.
+    // 
     error  error
     string string
 }
 
 func (f Foo) Error() error {
-    // `error` and `f.error` are
-    // visually similar
+    // error와 f.error는
+    // 시각적으로 유사하다
     return f.error
 }
 
 func (f Foo) String() string {
-    // `string` and `f.string` are
-    // visually similar
+    // string과 f.string은
+    // 시각적으로 유사하다
     return f.string
 }
 ```
@@ -1595,7 +1595,7 @@ var _defaultFoo = Foo{
     // ...
 }
 
-// or, better, for testability:
+// 또는 테스트 용이성을 위해 더 나은 방법:
 
 var _defaultFoo = defaultFoo()
 
@@ -2808,11 +2808,11 @@ type Client struct {
 
 ```go
 type A struct {
-    // Bad: A.Lock() and A.Unlock() are
-    //      now available, provide no
-    //      functional benefit, and allow
-    //      users to control details about
-    //      the internals of A.
+    // 나쁜 예: A.Lock()과 A.Unlock()이
+    //      외부에 노출되어 실익은 없고
+    //      사용자가 A 내부를
+    //      직접 제어할 수 있게 된다.
+    //      
     sync.Mutex
 }
 ```
@@ -2821,10 +2821,10 @@ type A struct {
 
 ```go
 type countingWriteCloser struct {
-    // Good: Write() is provided at this
-    //       outer layer for a specific
-    //       purpose, and delegates work
-    //       to the inner type's Write().
+    // 좋은 예: Write()는 특정 목적을 위해
+    //       외부 계층에 제공되며,
+    //       실제 작업은 내부 타입의
+    //       Write()에 위임한다.
     io.WriteCloser
 
     count int
@@ -2841,7 +2841,7 @@ func (w *countingWriteCloser) Write(bs []byte) (int, error) {
 
 ```go
 type Book struct {
-    // Bad: pointer changes zero value usefulness
+    // 나쁜 예: 포인터로 인해 제로 값의 유용성이 사라진다
     io.ReadWriter
 
     // other fields
@@ -2859,7 +2859,7 @@ b.Write(...) // panic: nil pointer
 
 ```go
 type Book struct {
-    // Good: has useful zero value
+    // 좋은 예: 유용한 제로 값을 가진다
     bytes.Buffer
 
     // other fields
@@ -3615,7 +3615,7 @@ func TestComplicatedTable(t *testing.T) {
 
   for _, tt := range tests {
     t.Run(tt.give, func(t *testing.T) {
-      // setup mocks
+      // 목(mock) 설정
       ctrl := gomock.NewController(t)
       xMock := xmock.NewMockX(ctrl)
       if tt.shouldCallX {
@@ -3632,7 +3632,7 @@ func TestComplicatedTable(t *testing.T) {
 
       got, err := DoComplexThing(tt.give, xMock, yMock)
 
-      // verify results
+      // 결과 검증
       if tt.wantErr != nil {
         require.EqualError(t, err, tt.wantErr)
         return
@@ -3648,7 +3648,7 @@ func TestComplicatedTable(t *testing.T) {
 
 ```go
 func TestShouldCallX(t *testing.T) {
-  // setup mocks
+  // 목(mock) 설정
   ctrl := gomock.NewController(t)
   xMock := xmock.NewMockX(ctrl)
   xMock.EXPECT().Call().Return("XResponse", nil)
@@ -3662,7 +3662,7 @@ func TestShouldCallX(t *testing.T) {
 }
 
 func TestShouldCallYAndFail(t *testing.T) {
-  // setup mocks
+  // 목(mock) 설정
   ctrl := gomock.NewController(t)
   xMock := xmock.NewMockX(ctrl)
 
