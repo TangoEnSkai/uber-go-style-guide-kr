@@ -1954,7 +1954,7 @@ close(stop)  // goroutine에 멈추라고 신호를 보낸다
 
 #### `init()`에서 goroutine을 사용하지 마라 (No goroutines in `init()`)
 
-`init()` 함수는 goroutine을 생성해서는 안 된다. [Avoid init()](#채널의-크기channel-size는-하나one-혹은-제로none)도 참고하라.
+`init()` 함수는 goroutine을 생성해서는 안 된다. [`init()` 사용을 피하라](#init-사용을-피하라-avoid-init)도 참고하라.
 
 패키지에 백그라운드 goroutine이 필요하다면, goroutine의 수명을 관리하는 객체를 노출해야 한다. 해당 객체는 백그라운드 goroutine에 멈추라는 신호를 보내고 종료를 대기하는 메서드(`Close`, `Stop`, `Shutdown` 등)를 제공해야 한다.
 
