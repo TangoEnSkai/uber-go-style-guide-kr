@@ -222,8 +222,8 @@ func (h LogHandler) ServeHTTP(
 
 ### 리시버(Receivers)와 인터페이스(Interfaces)
 
-값 리시버가 있는 메서드는 값 뿐만 아니라 포인터에서도 호출할 수 있습니다.
-포인터 리시버 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://golang.org/ref/spec#Method_values))에서만 호출할 수 있습니다.
+값 리시버가 있는 메서드는 값뿐만 아니라 포인터에서도 호출할 수 있다.
+포인터 리시버가 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://golang.org/ref/spec#Method_values))에서만 호출할 수 있다.
 
 예를 들면,
 
@@ -255,7 +255,7 @@ sPtrs[1].Read()
 sPtrs[1].Write("test")
 ```
 
-마찬가지로 메서드에 값 리시버가 있더라도 인터페이스는 포인터로 충족될 수 있습니다.
+마찬가지로 메서드에 값 리시버가 있더라도 인터페이스는 포인터로 충족될 수 있다.
 
 ```go
 type F interface {
