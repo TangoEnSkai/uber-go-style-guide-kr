@@ -911,7 +911,7 @@ if err := foo.Open("foo"); err != nil {
 s, err := store.New()
 if err != nil {
     return fmt.Errorf(
-        "failed to create new store: %s", err)
+        "failed to create new store: %w", err)
 }
 ```
 
@@ -921,7 +921,7 @@ if err != nil {
 s, err := store.New()
 if err != nil {
     return fmt.Errorf(
-        "new store: %s", err)
+        "new store: %w", err)
 }
 ```
 
