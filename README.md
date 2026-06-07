@@ -1169,13 +1169,13 @@ func main() {
 </td></tr>
 </tbody></table>
 
-Panic/recover는 오류 처리 전략(error handling strategy)이 이니다. nil dereference와 같이 복구 할 수 없는 일이 발생하는 경우에만 프로그램이 패닉 상태여야 한다. 프로그램 초기화는 여기에서 예외다: 프로그램을 시작 할 때, 프로그램을 중단해야 할 정도의 좋지 못한 일(bad things)이 발생할 경우 패닉을 일으킬 수 있다.
+Panic/recover는 오류 처리 전략이 아니다. nil 역참조(nil dereference)와 같이 복구 불가능한 상황에서만 패닉이 발생해야 한다. 예외는 프로그램 초기화 시다: 프로그램 시작 시 프로그램을 중단시켜야 할 심각한 문제가 발생하면 패닉을 일으킬 수 있다.
 
 ```go
 var _statusTemplate = template.Must(template.New("name").Parse("_statusHTML"))
 ```
 
-테스트에서 조차도, 테스트가 실패한 것으로 표기되는 것을 보장하기 위해 `panic`보다는 `t.Fatal` 혹은 `t.FailNow`가 선호된다.  
+테스트에서도, 테스트 실패를 올바르게 표기하기 위해 `panic`보다는 `t.Fatal` 혹은 `t.FailNow`를 사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
