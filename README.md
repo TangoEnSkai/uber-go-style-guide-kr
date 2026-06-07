@@ -154,7 +154,7 @@ row before the </tbody></table> line.
 
 이 문서는 Uber에서 따르는 Go 코드 컨벤션을 정리한다. 이들 중 많은 부분이 Go에 대한 일반적 지침이고, 나머지는 외부 리소스에 따라 확장한다:
 
-1. [Effective Go](https://golang.org/doc/effective_go.html)
+1. [Effective Go](https://go.dev/doc/effective_go)
 2. [Go Common Mistakes](https://github.com/golang/go/wiki/CommonMistakes)
 3. [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 
@@ -252,7 +252,7 @@ func (h LogHandler) ServeHTTP(
 ### 리시버(Receivers)와 인터페이스(Interfaces)
 
 값 리시버가 있는 메서드는 값뿐만 아니라 포인터에서도 호출할 수 있다.
-포인터 리시버가 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://golang.org/ref/spec#Method_values))에서만 호출할 수 있다.
+포인터 리시버가 있는 메서드는 포인터 또는 주소 지정 가능한 값([addressable value](https://go.dev/ref/spec#Method_values))에서만 호출할 수 있다.
 
 예를 들면,
 
@@ -323,7 +323,7 @@ i = s2Ptr
 
 Effective Go에 [Pointers vs. Values]에 대한 좋은 글이 있으니 참고하기 바란다.
 
-  [Pointers vs. Values]: https://golang.org/doc/effective_go.html#pointers_vs_values
+  [Pointers vs. Values]: https://go.dev/doc/effective_go#pointers_vs_values
 
 ### 제로 값 뮤텍스(Zero-value Mutexes)는 유효하다
 
@@ -1120,7 +1120,7 @@ if err != nil {
 
 [type assertion]의 단일 반환 값 형식(the single return value form)은 잘못된 타입에 패닉 상태가 된다. 따라서 항상 "comma ok" 관용구(idiom)을 사용하는 것을 권장한다.
 
-  [type assertion]: https://golang.org/ref/spec#Type_assertions
+  [type assertion]: https://go.dev/ref/spec#Type_assertions
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2488,7 +2488,7 @@ import (
 
 우리는 Go 커뮤니티의 [MixedCaps for function names]의 사용에 의한 컨벤션을 따른다. 테스트 함수(test functions)는 예외이다. 이는 관련 테스트케이스를 그룹화 할 목적으로 언더스코어(_)를 포함할 수 있다, 예를들어, `TestMyFunction_WhatIsBeingTested`.
 
-  [MixedCaps for function names]: https://golang.org/doc/effective_go.html#mixed-caps
+  [MixedCaps for function names]: https://go.dev/doc/effective_go#mixed-caps
 
 ### Import 별칭 (Import Aliasing)
 
@@ -3332,7 +3332,7 @@ func printInfo(name string, region Region, status Status)
 
 ### 이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)
 
-Go는 [raw string literals](https://golang.org/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸친 코드와 따옴표를 포함할 수 있다. 이스케이프 처리가 많아 읽기 어려운 문자열을 피하기 위해 원시 문자 리터럴을 사용하라.
+Go는 [raw string literals](https://go.dev/ref/spec#raw_string_lit)을 지원하며 여러 줄에 걸친 코드와 따옴표를 포함할 수 있다. 이스케이프 처리가 많아 읽기 어려운 문자열을 피하기 위해 원시 문자 리터럴을 사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
