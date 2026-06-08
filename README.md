@@ -2667,7 +2667,7 @@ if b {
 
 ### 최상위 변수 선언 (Top-level Variable Declarations)
 
-최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용하라. 표현식과 타입이 다를 경우에만 타입을 명시하라.
+최상위 레벨에서는 표준 `var` 키워드를 사용하라. 표현식과 원하는 타입이 다를 경우에만 타입을 명시하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
