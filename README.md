@@ -231,7 +231,7 @@ func (h *Handler) ServeHTTP(
 
 `var _ http.Handler = (*Handler)(nil)`구문은 `*Handler`가 `http.Handler` 인터페이스와 일치하지 않는 경우 컴파일에 실패한다.
 
-할당문의 우변 (the right hand side of the assignment)은 어설션된 타입의 제로 값(zero value)이어야 한다. 이것은 포인터 타입(`*Handler`와 같은), slice 및 map의 경우 `nil`이고 struct 타입의 경우 빈 구조체다. 
+할당의 오른쪽 값은 어설션된 타입의 제로 값이어야 한다. 포인터 타입(`*Handler` 등), 슬라이스, 맵의 경우 `nil`이고, 구조체 타입의 경우 빈 구조체다.
 
 ```go
 type LogHandler struct {
@@ -576,7 +576,7 @@ c := make(chan int, 64)
 
 ```go
 // 사이즈 1
-c := make(chan int, 1) // 혹은
+c := make(chan int, 1) // 또는
 // 버퍼링 되지 않는 채널, 사이즈 0
 c := make(chan int)
 ```
@@ -961,7 +961,7 @@ x: y: new store: the error
 </td></tr>
 </tbody></table>
 
-그러나, 일단 오류가 다른 시스템으로 전송되면, 그 메시지가 오류임은 분명히 해야 한다. (예를들어 `err` 태그(tag) 혹은 로그에서의 "Failed" 접두사 사용)
+그러나, 일단 오류가 다른 시스템으로 전송되면, 그 메시지가 오류임은 분명히 해야 한다. (예를 들어 `err` 태그 또는 로그에서의 "Failed" 접두사 사용)
 
 또한 다음의 글을 참고하라: [Don't just check errors, handle them gracefully].
 
@@ -1196,7 +1196,7 @@ Panic/recover는 오류 처리 전략이 아니다. nil 역참조(nil dereferenc
 var _statusTemplate = template.Must(template.New("name").Parse("_statusHTML"))
 ```
 
-테스트에서도, 테스트 실패를 올바르게 표기하기 위해 `panic`보다는 `t.Fatal` 혹은 `t.FailNow`를 사용하라.
+테스트에서도, 테스트 실패를 올바르게 표기하기 위해 `panic`보다는 `t.Fatal` 또는 `t.FailNow`를 사용하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2537,12 +2537,11 @@ import (
 - 함수는 대략적인 호출 순서에 따라 정렬해야 한다.
 - 파일 내의 함수는 리시버별로 그룹화되어야 한다.
 
-그러므로, 수출되는 함수 (exported function)는 파일 내의 `struct`, `const`, `var`의 정의 구문 이후의 시작 부분에 나타나야 한다.
+따라서 내보내는 함수(exported function)는 파일 내 `struct`, `const`, `var` 정의 이후 처음에 나타나야 한다.
 
-`newXYZ()`/`NewXYZ()`가 타입이 정의된 뒷부분에 나타날 수 있지만, 이는 나머지 리시버(receiver)의 메서드들 전에 나타나야 한다 (may appear after the type is defined, but before the
-rest of the methods on the receiver.)
+`newXYZ()`/`NewXYZ()`는 타입이 정의된 이후에 나타날 수 있지만, 나머지 리시버(receiver) 메서드들보다는 앞에 위치해야 한다.
 
-함수들은 리시버에 의해 그룹화 되므로, 일반 유틸리티 함수들(plain utility functions)는 파일의 뒷부분에 나타나야 한다.
+함수는 리시버별로 그룹화되므로, 일반 유틸리티 함수(plain utility function)는 파일 뒤쪽에 위치해야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2588,7 +2587,7 @@ func calcCost(n []int) int {...}
 
 ### 중첩 감소 (Reduce Nesting)
 
-코드는 에러 케이스 혹은 특수 조건(error cases / special conditions)을 먼저 처리하고 루프를 일찍 리턴하거나 계속 지속함으로써 가능한 중첩(nesting)을 줄일 수 있어야 한다. 여러 레벨로 중첩된(nested multiple levels)코드의 양을 줄이도록 해라.
+에러 케이스나 특수 조건을 먼저 처리하고 루프에서 일찍 반환(return)하거나 continue함으로써 중첩을 최소화하라. 여러 단계로 중첩된 코드의 양을 줄여야 한다.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2924,7 +2923,7 @@ k := User{
 </td></tr>
 </tbody></table>
 
-예외: 테스트 테이블에서 필드명은 3개 일때 혹은 이보다 적을 때 생략될 수 있음.
+예외: 테스트 테이블에서 필드명은 3개 이하일 때 생략될 수 있다.
 
 ```go
 tests := []struct{
