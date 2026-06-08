@@ -2903,7 +2903,7 @@ type Client struct {
 
 #### 구조체 초기화를 위해 필드를 사용하라 (Use Field Names to initialize Structs)
 
-구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
+구조체를 초기화할 때는 거의 항상 필드 이름을 지정해야 한다. 이는 현재 [`go vet`]에 의해 강제된다.
 
   [`go vet`]: https://pkg.go.dev/cmd/vet
 
@@ -3123,7 +3123,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용하라. `nil`을 체크하지 말라.
+- 슬라이스가 비어 있는지 확인하려면 항상 `len(s) == 0`을 사용하라. `nil`을 체크하지 말라.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
