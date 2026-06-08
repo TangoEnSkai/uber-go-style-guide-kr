@@ -107,7 +107,7 @@ row before the </tbody></table> line.
       - [`init()`에서 goroutine을 사용하지 마라 (No goroutines in `init()`)](#init에서-goroutine을-사용하지-마라-no-goroutines-in-init)
   - [성능(Performance)](#성능performance)
     - [`fmt` 보다 `strconv` 선호](#fmt-보다-strconv-선호)
-    - [string-to-byte 변환을 피해라 (Avoid repeated string-to-byte conversions)](#string-to-byte-변환을-피해라-avoid-repeated-string-to-byte-conversions)
+    - [string-to-byte 변환을 피하라 (Avoid repeated string-to-byte conversions)](#string-to-byte-변환을-피하라-avoid-repeated-string-to-byte-conversions)
     - [컨테이너 용량 지정을 선호하라 (Prefer Specifying Container Capacity)](#컨테이너-용량-지정을-선호하라-prefer-specifying-container-capacity)
       - [Map 용량 힌트 지정 (Specifying Map Capacity Hints)](#map-용량-힌트-지정-specifying-map-capacity-hints)
       - [슬라이스 용량 지정 (Specifying Slice Capacity)](#슬라이스-용량-지정-specifying-slice-capacity)
@@ -126,14 +126,14 @@ row before the </tbody></table> line.
     - [수출되지 않은 전역에 _을 붙여라 (Prefix Unexported Globals with _)](#수출되지-않은-전역에-_을-붙여라-prefix-unexported-globals-with-_)
     - [구조체에서의 임베딩 (Embedding in Structs)](#구조체에서의-임베딩-embedding-in-structs)
     - [구조체 초기화 (Initializing Structs)](#구조체-초기화-initializing-structs)
-      - [구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)](#구조체-초기화를-위해-필드를-사용해라-use-field-names-to-initialize-structs)
+      - [구조체 초기화를 위해 필드를 사용하라 (Use Field Names to initialize Structs)](#구조체-초기화를-위해-필드를-사용하라-use-field-names-to-initialize-structs)
       - [구조체의 제로 값 필드 생략 (Omit Zero Value Fields in Structs)](#구조체의-제로-값-필드-생략-omit-zero-value-fields-in-structs)
       - [제로 값 구조체에 `var` 사용 (Use `var` for Zero Value Structs)](#제로-값-구조체에-var-사용-use-var-for-zero-value-structs)
       - [구조체 참조 초기화 (Initializing Struct References)](#구조체-참조-초기화-initializing-struct-references)
     - [지역 변수 선언 (Local Variable Declarations)](#지역-변수-선언-local-variable-declarations)
     - [nil은 유효한 슬라이스 (nil is a valid slice)](#nil은-유효한-슬라이스-nil-is-a-valid-slice)
     - [변수의 범위를 줄여라 (Reduce Scope of Variables)](#변수의-범위를-줄여라-reduce-scope-of-variables)
-    - [Naked 매개변수를 피해라 (Avoid Naked Parameters)](#naked-매개변수를-피해라-avoid-naked-parameters)
+    - [Naked 매개변수를 피하라 (Avoid Naked Parameters)](#naked-매개변수를-피하라-avoid-naked-parameters)
     - [이스케이핑을 피하기 위해 원시 문자 리터럴 사용 (Use Raw String Literals to Avoid Escaping)](#이스케이핑을-피하기-위해-원시-문자-리터럴-사용-use-raw-string-literals-to-avoid-escaping)
     - [Map 초기화 (Initializing Maps)](#map-초기화-initializing-maps)
     - [Printf외부의 문자열 형식 (Format Strings outside Printf)](#printf외부의-문자열-형식-format-strings-outside-printf)
@@ -2093,7 +2093,7 @@ BenchmarkStrconv-4    64.2 ns/op    1 allocs/op
 </td></tr>
 </tbody></table>
 
-### string-to-byte 변환을 피해라 (Avoid repeated string-to-byte conversions)
+### string-to-byte 변환을 피하라 (Avoid repeated string-to-byte conversions)
 
 고정 문자열에서 바이트 슬라이스를 반복해서 생성하지 마라. 대신 변환을 한 번만 수행하고 결과를 저장해서 재사용하라.
 
@@ -2901,7 +2901,7 @@ type Client struct {
 
 ### 구조체 초기화 (Initializing Structs)
 
-#### 구조체 초기화를 위해 필드를 사용해라 (Use Field Names to initialize Structs)
+#### 구조체 초기화를 위해 필드를 사용하라 (Use Field Names to initialize Structs)
 
 구조체를 초기화 할 때에는 거의 대부분 필드 명을 지정해야 한다. 이것은 이제 [`go vet`]에 의해서 강제하고 있다.
 
@@ -3284,7 +3284,7 @@ func Bar() {
 </td></tr>
 </tbody></table>
 
-### Naked 매개변수를 피해라 (Avoid Naked Parameters)
+### Naked 매개변수를 피하라 (Avoid Naked Parameters)
 
 함수 호출에서의 naked parameters는 가독성을 떨어뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하라.
 
