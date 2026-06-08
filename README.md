@@ -170,7 +170,7 @@ row before the </tbody></table> line.
 - 저장 시 `goimports` 자동 실행
 - `golint` 및 `go vet`를 실행하여 오류 확인
 
-여기에서 Go 도구에 대한 편집기 지원 정보를 찾을 수 있다:
+Go 도구의 편집기 지원 정보는 다음을 참고하라:
 <https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins>
 
 ## 가이드라인 (Guidelines)
@@ -1236,7 +1236,7 @@ if err != nil {
 
 ### go.uber.org/atomic의 사용
 
-[sync/atomic] 패키지를 사용한 아토믹 연산(atomic operation)은 원시 타입 (raw type: e.g. `int32`, `int64`, etc.)에서 작동하므로, 아토믹 연산을 사용하여 변수를 읽거나 수정하는 것을 쉽게 잊어버릴 수 있다.
+[sync/atomic] 패키지를 사용한 아토믹 연산은 원시 타입(`int32`, `int64` 등)에서 작동한다. 이 때문에 변수를 읽거나 수정할 때 아토믹 연산을 사용해야 한다는 사실을 실수로 빠뜨리기 쉽다.
 
 [go.uber.org/atomic]는 기본 타입(underlying type)을 숨겨서 이런 유형의 연산에 타입 안전성을 부여한다(add type safety). 또한, 이는 간편한 `atomic.Bool` 타입을 포함하고 있다.
 
@@ -1881,7 +1881,7 @@ bytes, err := json.Marshal(Stock{
 
 ### Goroutine을 Fire-and-Forget 방식으로 실행하지 마라 (Don't fire-and-forget goroutines)
 
-Goroutine은 경량이지만 비용이 없는 것은 아니다: 최소한 스택을 위한 메모리와 스케줄링을 위한 CPU가 필요하다. 일반적인 goroutine 사용에서는 이 비용이 작지만, 수명이 제어되지 않는 상태로 대량으로 생성되면 심각한 성능 문제를 일으킬 수 있다. 수명이 관리되지 않는 goroutine은 미사용 객체의 가비지 컬렉션을 방해하거나 더 이상 사용되지 않는 리소스를 계속 보유하는 등의 문제를 야기할 수도 있다.
+Goroutine은 경량이지만 비용이 있다: 최소한 스택용 메모리와 스케줄링용 CPU가 필요하다. 일반적인 goroutine 사용에서는 이 비용이 작지만, 수명이 제어되지 않는 상태로 대량으로 생성되면 심각한 성능 문제를 일으킬 수 있다. 수명이 관리되지 않는 goroutine은 미사용 객체의 가비지 컬렉션을 방해하거나 더 이상 사용되지 않는 리소스를 계속 보유하는 등의 문제를 야기할 수도 있다.
 
 따라서, 프로덕션 코드에서 goroutine을 누수(leak)시키지 마라. goroutine을 생성할 수 있는 패키지 내의 goroutine 누수를 테스트하려면 [go.uber.org/goleak](https://pkg.go.dev/go.uber.org/goleak)을 사용하라.
 
@@ -2476,7 +2476,7 @@ import (
 
 패키지 이름을 정할 때, 아래와 같은 이름을 선택하라:
 
-- 모두 알파벳 소문자 사용, 대문자와 언더스코어 (_)는 사용하지 말 것.
+- 모두 알파벳 소문자 사용, 대문자와 언더스코어 (_)는 사용하지 말라.
 - 대부분의 호출 지점에서 named import로 이름을 바꿀 필요가 없다.
 - 짧고 간결하게. 이름은 모든 호출 지점에서 사용됨을 기억하라.
 - 복수형(plural) 사용 금지. 예를 들어, `net/urls` 가 아닌 `net/url`.
@@ -3123,7 +3123,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용하라. `nil`을 체크하지 말 것.
+- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용하라. `nil`을 체크하지 말라.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
