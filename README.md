@@ -156,7 +156,7 @@ row before the </tbody></table> line.
 이는 원래 [Prashant Varanasi]와 [Simon Newton]이 동료들의 Go 개발 속도를 높이기 위해 소개했다. 수년간 피드백을 통해 꾸준히 개선되었다.
 
   [Prashant Varanasi]: https://github.com/prashantv
-  [Simon Newton]: https://github.com/nomis52 
+  [Simon Newton]: https://github.com/nomis52
 
 이 문서는 Uber에서 따르는 Go 코드 컨벤션을 정리한다. 이들 중 많은 부분이 Go에 대한 일반적 지침이고, 나머지는 외부 리소스에 따라 확장한다:
 
@@ -192,7 +192,7 @@ Go 도구의 편집기 지원 정보는 다음을 참고하라:
 
 적절한 경우, 컴파일 시간에 인터페이스 컴플라이언스를 검증한다. 이는 다음을 포함한다:
 - API contract의 일부로 특정 인터페이스를 구현하는데 필요한 exported 타입
-- 동일한 인터페이스를 구현하는 타입의 컬렉션의 일부인 exported 또는 unexported 타입 
+- 동일한 인터페이스를 구현하는 타입의 컬렉션의 일부인 exported 또는 unexported 타입
 - 기타 인터페이스 위반으로 인해 사용자가 중단되는 경우
 
 <table>
@@ -3147,7 +3147,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- 제로 값(The zero value), `var`로 선언된 슬라이스의 경우,은 `make()`없이 바로 사용 할 수 있다.
+- `var`로 선언된 슬라이스(제로 값)는 `make()` 없이 바로 사용할 수 있다.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
