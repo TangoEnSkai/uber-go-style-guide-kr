@@ -1,13 +1,19 @@
 # uber-go-style-guide-kr
 
-- **Translated in Korean**  
+[![원문 기준](https://img.shields.io/badge/원문_기준-2023--05--09-blue)](https://github.com/uber-go/guide/blob/master/CHANGELOG.md#2023-05-09)
+[![원본 리포](https://img.shields.io/badge/원본-uber--go%2Fguide-lightgrey)](https://github.com/uber-go/guide)
 
-  - First translation done with original doc on 17th of Oct, 2019 from [uber-go/guide](https://github.com/uber-go/guide)
-  - Please feel free to fork and PR if you find any updates, issues or improvement.
+- **Translated in Korean**
+
+  - Based on [uber-go/guide](https://github.com/uber-go/guide) style.md (synced up to **2023-05-09**)
+  - Please feel free to fork and PR if you find any updates, issues, or improvements.
+  - Contribution guide: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 - **한국어 번역본**
-  - 초벌 번역은 [uber-go/guide](https://github.com/uber-go/guide)의 2019년 10월 17일 의 style.md 파일을 기반으로 완성되었음.
-  - 기술 용어에 대한 과도한 한국어 번역은 지양하였으며, 특정 용어에 대한 한국어 번역을 했을 때에는 괄호로 원문의 단어를 살려두어 최대한 원문의 의도를 왜곡하지 않는 방향에서 번역 함.
+  - [uber-go/guide](https://github.com/uber-go/guide)의 한국어 번역입니다.
+  - 원문 기준: **2023-05-09** ([CHANGELOG](https://github.com/uber-go/guide/blob/master/CHANGELOG.md#2023-05-09))
+  - 기술 용어는 가능한 원어를 유지하며, 번역 시 괄호로 원문 표현을 병기합니다.
+  - 번역 기여 방법: [CONTRIBUTING.md](./CONTRIBUTING.md) 참고
 
 ---
 
