@@ -319,7 +319,7 @@ i = s2Ptr
 //   i = s2Val
 ```
 
-Effective Go에 [Pointers vs. Values]에 대한 좋은 글이 있으니 참고하기 바란다.
+Effective Go에 [Pointers vs. Values]에 대한 좋은 글이 있으니 참고하라.
 
   [Pointers vs. Values]: https://go.dev/doc/effective_go#pointers_vs_values
 
@@ -414,7 +414,7 @@ func (m *SMap) Get(k string) string {
 
 #### 슬라이스와 맵 수신
 
-참조(reference)를 저장하면 인수로 받은 맵이나 슬라이스를 호출자가 수정할 수 있음을 명심하자.
+참조(reference)를 저장하면 인수로 받은 맵이나 슬라이스를 호출자가 수정할 수 있음을 유의하라.
 
 <table>
 <thead><tr><th>Bad</th> <th>Good</th></tr></thead>
@@ -2476,7 +2476,7 @@ import (
 - 복수형(plural) 사용 금지. 예를 들어, `net/urls` 가 아닌 `net/url`.
 - "common", "util", "shared", 또는 "lib"의 용어 사용 금지. 정보가 없는 좋지 못한 이름임.
 
-또한 [Package Names] 와 [Style guideline for Go packages]를 참고하기 바란다.
+또한 [Package Names] 와 [Style guideline for Go packages]를 참고하라.
 
   [Package Names]: https://blog.golang.org/package-names
   [Style guideline for Go packages]: https://rakyll.org/style-packages/
@@ -2661,7 +2661,7 @@ if b {
 
 ### 최상위 변수 선언 (Top-level Variable Declarations)
 
-최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용해라. 표현식과 타입이 다를 경우에만 타입을 명시하라.
+최상위 레벨에서 (At the top level), 표준 `var` 키워드를 사용하라. 표현식과 타입이 다를 경우에만 타입을 명시하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -2687,7 +2687,7 @@ func F() string { return "A" }
 </td></tr>
 </tbody></table>
 
-표현식의 타입이 원하는 타입과 정확하게 일치하지 않는 경우 타입을 지정해라.
+표현식의 타입이 원하는 타입과 정확하게 일치하지 않는 경우 타입을 지정하라.
 
 ```go
 type myError struct{}
@@ -3005,7 +3005,7 @@ var user User
 
 #### 구조체 참조 초기화 (Initializing Struct References)
 
-구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 해라.
+구조체 참조(struct reference)를 초기화 할 때, `new(T)`대신에 `&T{}`을 사용하여 구조체 초기화와 일관성을 가지도록 하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3117,7 +3117,7 @@ func f(list []int) {
   </td></tr>
   </tbody></table>
 
-- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용해라. `nil`을 체크하지 말 것.
+- 슬라이스가 비어있는지 확인하기 위해서 항상 `len(s) == 0`을 사용하라. `nil`을 체크하지 말 것.
 
   <table>
   <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3280,7 +3280,7 @@ func Bar() {
 
 ### Naked 매개변수를 피해라 (Avoid Naked Parameters)
 
-함수 호출에서의 naked parameters는 가독성을 떨어 뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하기 바란다.
+함수 호출에서의 naked parameters는 가독성을 떨어뜨릴 수 있다. 의미가 명확하지 않은 경우, C언어 스타일의 주석 (`/* ... */`)을 추가하라.
 
 <table>
 <thead><tr><th>Bad</th><th>Good</th></tr></thead>
@@ -3447,9 +3447,9 @@ fmt.Printf(msg, 1, 2)
 
 ### Printf-스타일 함수의 이름 (Naming Printf-style Functions)
 
-`Printf`-스타일의 함수를 선언할 때, `go vet`이 이를 감지하고 형식 문자열 (format string)을 체크 할 수 있는지 확인해라.
+`Printf`-스타일의 함수를 선언할 때, `go vet`이 이를 감지하고 형식 문자열 (format string)을 체크 할 수 있는지 확인하라.
 
-이것은 미리 정의된 `Printf` 스타일 함수를 사용해야 한다는 뜻이다. `go vet`이 기본적으로 이를 검사한다. 자세한 정보는 다음을 참조하기 바란다: [Printf family]
+이것은 미리 정의된 `Printf` 스타일 함수를 사용해야 한다는 뜻이다. `go vet`이 기본적으로 이를 검사한다. 자세한 정보는 다음을 참고하라: [Printf family]
 
   [Printf family]: https://pkg.go.dev/cmd/vet#hdr-Printf_family
 
@@ -3459,7 +3459,7 @@ fmt.Printf(msg, 1, 2)
 go vet -printfuncs=wrapf,statusf
 ```
 
-또한 다음을 참고해라: [go vet: Printf family check].
+또한 다음을 참고하라: [go vet: Printf family check].
 
   [go vet: Printf family check]: https://kuzminva.wordpress.com/2017/11/07/go-vet-printf-family-check/
 
@@ -3829,7 +3829,7 @@ func Open(
 
 클로저(closure)를 사용해 이 패턴을 구현하는 방법도 있지만, 위의 struct 기반 패턴이 작성자에게 더 많은 유연성을 제공하고 사용자가 디버깅 및 테스트하기 더 쉽다고 판단한다. 특히 테스트와 mock에서 옵션끼리 비교가 가능하지만 클로저에서는 불가능하다. 또한 옵션이 `fmt.Stringer`를 포함한 다른 인터페이스를 구현할 수 있어 사용자가 읽을 수 있는 문자열 표현을 제공할 수 있다.
 
-아래의 자료도 참고하기 바란다:
+아래의 자료도 참고하라:
 
 - [Self-referential functions and the design of options](https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html)
 - [Functional options for friendly APIs](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis)
