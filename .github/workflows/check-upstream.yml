@@ -5,6 +5,10 @@ on:
     - cron: '0 9 * * 1'  # 매주 월요일 오전 9시 (UTC)
   workflow_dispatch:       # 수동 실행 가능
 
+permissions:
+  contents: write   # .github/upstream-sha.txt 커밋/푸시
+  issues: write     # 원본 변경 감지 시 이슈 생성
+
 jobs:
   check-upstream:
     runs-on: ubuntu-latest
@@ -15,55 +19,52 @@ jobs:
       - name: 원본 CHANGELOG 가져오기
         id: upstream
         run: |
-          curl -s https://raw.githubusercontent.com/uber-go/guide/master/CHANGELOG.md \
+          curl -fsSL https://raw.githubusercontent.com/uber-go/guide/master/CHANGELOG.md \
             -o /tmp/upstream_changelog.md
           LATEST=$(grep -m1 '^# ' /tmp/upstream_changelog.md | sed 's/# //')
-          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
           echo "원본 최신 날짜: $LATEST"
 
       - name: 원본 style.md SHA 확인
         id: sha
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 원본 style.md 현재 SHA 가져오기
-          UPSTREAM_SHA=$(curl -s "https://api.github.com/repos/uber-go/guide/contents/style.md" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | \
-            python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('sha','unknown'))")
-          echo "upstream_sha=$UPSTREAM_SHA" >> $GITHUB_OUTPUT
+          UPSTREAM_SHA=$(gh api repos/uber-go/guide/contents/style.md --jq '.sha')
+          echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
           echo "원본 style.md SHA: $UPSTREAM_SHA"
 
-          # 번역 리포에 저장된 마지막 동기화 SHA 읽기
           SAVED_SHA=$(cat .github/upstream-sha.txt 2>/dev/null || echo "none")
-          echo "saved_sha=$SAVED_SHA" >> $GITHUB_OUTPUT
+          echo "saved_sha=$SAVED_SHA" >> "$GITHUB_OUTPUT"
           echo "저장된 SHA: $SAVED_SHA"
 
       - name: 번역 리포 기준 날짜 확인
         id: translation
         run: |
-          CURRENT=$(grep -m1 '원문 기준:' CHANGELOG.md | grep -oP '\d{4}-\d{2}-\d{2}' | head -1 || echo "unknown")
-          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+          CURRENT=$(grep -m1 '원문 기준:' CHANGELOG.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1 || echo "unknown")
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
           echo "번역 기준 날짜: $CURRENT"
 
       - name: 차이 비교 및 이슈 생성
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LATEST: ${{ steps.upstream.outputs.latest }}
+          CURRENT: ${{ steps.translation.outputs.current }}
+          UPSTREAM_SHA: ${{ steps.sha.outputs.upstream_sha }}
+          SAVED_SHA: ${{ steps.sha.outputs.saved_sha }}
         run: |
-          LATEST="${{ steps.upstream.outputs.latest }}"
-          CURRENT="${{ steps.translation.outputs.current }}"
-          UPSTREAM_SHA="${{ steps.sha.outputs.upstream_sha }}"
-          SAVED_SHA="${{ steps.sha.outputs.saved_sha }}"
-
           echo "원본 최신: $LATEST / 번역 기준: $CURRENT"
           echo "원본 SHA: $UPSTREAM_SHA / 저장 SHA: $SAVED_SHA"
 
           CHANGELOG_CHANGED=false
           SHA_CHANGED=false
 
-          # CHANGELOG 날짜 비교
+          # CHANGELOG 날짜 비교 (YYYY-MM-DD 는 사전순 비교로 충분)
           if [ "$LATEST" \> "$CURRENT" ]; then
             CHANGELOG_CHANGED=true
           fi
 
-          # SHA 비교 (CHANGELOG에 없는 변경 감지)
+          # SHA 비교 (CHANGELOG 에 기록되지 않은 변경 감지)
           if [ "$UPSTREAM_SHA" != "$SAVED_SHA" ] && [ "$SAVED_SHA" != "none" ]; then
             SHA_CHANGED=true
           fi
@@ -77,54 +78,53 @@ jobs:
 
               EXTRA_NOTE=""
               if [ "$SHA_CHANGED" = "true" ]; then
-                EXTRA_NOTE="
-> ⚠️ **참고**: style.md SHA가 변경되었으나 CHANGELOG에 반영되지 않았을 수 있습니다. 원본을 직접 확인해 주세요.
-> SHA: \`$SAVED_SHA\` → \`$UPSTREAM_SHA\`"
+                EXTRA_NOTE="> ⚠️ **참고**: style.md SHA가 변경되었으나 CHANGELOG에 반영되지 않았을 수 있습니다. 원본을 직접 확인해 주세요.
+          > SHA: \`$SAVED_SHA\` → \`$UPSTREAM_SHA\`"
               fi
+
+              # heredoc 본문은 블록 스칼라 기준 들여쓰기(10칸)에 맞춰 작성한다.
+              # YAML 이 공통 들여쓰기를 제거하므로 셸에서는 1열에서 시작한다.
+              cat > /tmp/issue-body.md <<BODY
+          ## 원본 업데이트 감지
+
+          원본 [uber-go/guide](https://github.com/uber-go/guide) 리포지토리가 **$LATEST** 에 업데이트되었습니다.
+          현재 번역 기준: **$CURRENT**
+
+          $EXTRA_NOTE
+
+          ## 변경 사항
+
+          $CHANGES
+
+          ## 참고 링크
+
+          - [원본 CHANGELOG](https://github.com/uber-go/guide/blob/master/CHANGELOG.md)
+          - [원본 style.md](https://github.com/uber-go/guide/blob/master/style.md)
+
+          ---
+          *이 이슈는 GitHub Actions 에 의해 자동 생성되었습니다.*
+          BODY
 
               gh issue create \
                 --title "[원본 업데이트] uber-go/guide $LATEST 변경 사항 번역 필요" \
-                --label "documentation,upstream-update" \
-                --body "## 원본 업데이트 감지
-
-원본 [uber-go/guide](https://github.com/uber-go/guide) 리포지토리가 **$LATEST** 에 업데이트되었습니다.
-현재 번역 기준: **$CURRENT**
-$EXTRA_NOTE
-
-## 변경 사항
-
-$CHANGES
-
-## 참고 링크
-- [원본 CHANGELOG](https://github.com/uber-go/guide/blob/master/CHANGELOG.md)
-- [원본 style.md](https://github.com/uber-go/guide/blob/master/style.md)
-
----
-*이 이슈는 GitHub Actions에 의해 자동 생성되었습니다.*"
+                --label "documentation" \
+                --label "upstream-update" \
+                --body-file /tmp/issue-body.md
               echo "✅ 이슈 생성 완료"
             else
               echo "ℹ️ 이미 동일 이슈가 존재합니다"
             fi
-
-            # SHA 업데이트 커밋
-            if [ "$SHA_CHANGED" = "true" ] || [ "$SAVED_SHA" = "none" ]; then
-              echo "$UPSTREAM_SHA" > .github/upstream-sha.txt
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
-              git add .github/upstream-sha.txt
-              git commit -m "chore: upstream style.md SHA 업데이트 ($UPSTREAM_SHA)" || true
-              git push || true
-            fi
           else
             echo "✅ 번역이 최신 상태입니다"
+          fi
 
-            # 초기 SHA 저장 (파일이 없는 경우)
-            if [ "$SAVED_SHA" = "none" ]; then
-              echo "$UPSTREAM_SHA" > .github/upstream-sha.txt
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
-              git add .github/upstream-sha.txt
-              git commit -m "chore: upstream style.md SHA 초기 저장 ($UPSTREAM_SHA)" || true
-              git push || true
-            fi
+          # 감지 결과와 무관하게 최신 SHA 를 기록해 다음 실행의 기준으로 삼는다.
+          if [ "$UPSTREAM_SHA" != "$SAVED_SHA" ]; then
+            echo "$UPSTREAM_SHA" > .github/upstream-sha.txt
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .github/upstream-sha.txt
+            git commit -m "chore: upstream style.md SHA 업데이트 ($UPSTREAM_SHA)"
+            git push
+            echo "✅ upstream-sha.txt 갱신: $SAVED_SHA → $UPSTREAM_SHA"
           fi
